@@ -14,7 +14,7 @@ New-AzResourceGroup -Name $ResourceGroupName -Location $Location -Force
 Test-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -Location $Location
 
 New-AzResourceGroupDeployment -Name $deploymentName -ResourceGroupName $ResourceGroupName -Location $Location `
-     -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -databasePassword $databasePassword  -prefix $prefix -Force
+     -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -prefix $prefix  -databasePassword $databasePassword -Force
 
 $webappName = (Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.webappName.value
 $ServerName = (Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.dbName.value
