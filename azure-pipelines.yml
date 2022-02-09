@@ -1,0 +1,40 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  - master
+
+pool:
+  vmImage: 'windows-latest'
+  
+stages:
+  - stage: ARM_CI
+    jobs:
+    - job: ARM_Testing
+      steps:
+        - task: RunARMTTKTests@1
+          displayName: Run ARM TTK tests 
+          name: TTKtests
+          inputs:
+            templatelocation: '$(System.DefaultWorkingDirectory)\templates'
+            resultLocation: '$(System.DefaultWorkingDirectory)\results'
+
+        - task: PublishTestResults@2
+          displayName: Publish test restults
+          name: PublishResults
+          inputs:
+            testResultsFormat: 'NUnit'
+            testResultsFiles: '$(System.DefaultWorkingDirectory)\results\*-armttk.xml'
+          condition: always()
+        
+        - task: AzurePowerShell@5 
+          inputs:
+            azureSubscription: 'Azure1'
+            ScriptType: 'FilePath'
+            ScriptPath: 'templates/azuredeploy.ps1'
+            ScriptArguments: -Location ${env:LOCATION} -ResourceGroupName ${env:GROUP} -DatabasePassword $env:MAPPED_ENV_DB_PASS -TemplateFile templates\azuredeploy.json -TemplateParameterFile templates\azuredeploy.parameters.json
+            azurePowerShellVersion: 'LatestVersion'
+          env:
+            MAPPED_ENV_DB_PASS: $(DatabasePassword)
