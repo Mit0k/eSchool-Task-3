@@ -146,7 +146,6 @@
                         ]
                     }
                 ],
-                "delegations": [],
                 "privateEndpointNetworkPolicies": "Disabled",
                 "privateLinkServiceNetworkPolicies": "Enabled"
             }
