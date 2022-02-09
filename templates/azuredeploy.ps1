@@ -12,6 +12,7 @@ $DatabasePassword = ConvertTo-SecureString $DatabasePassword  -AsPlainText -Forc
 
 New-AzResourceGroup -Name $ResourceGroupName -Location $Location -Force
 Test-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -Location $Location
+
 New-AzResourceGroupDeployment -Name $deploymentName -ResourceGroupName $ResourceGroupName `
      -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -databasePassword $databasePassword -Location $Location -Force
 

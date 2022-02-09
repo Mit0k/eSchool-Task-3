@@ -131,27 +131,6 @@
             }
         },
         {
-            "type": "Microsoft.Network/virtualNetworks/subnets",
-            "apiVersion": "2020-11-01",
-            "name": "[concat(variables('vnet_name'), '/snet-mysql')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet_name'))]"
-            ],
-            "properties": {
-                "addressPrefix": "10.2.0.0/24",
-                "serviceEndpoints": [
-                    {
-                        "service": "Microsoft.Sql",
-                        "locations": [
-                            "[parameters('location')]"
-                        ]
-                    }
-                ],
-                "privateEndpointNetworkPolicies": "Disabled",
-                "privateLinkServiceNetworkPolicies": "Enabled"
-            }
-        },
-        {
             "type": "Microsoft.Web/sites/config",
             "apiVersion": "2021-02-01",
             "name": "[concat(variables('webapp_name'), '/web')]",
@@ -184,7 +163,7 @@
             "name": "[concat(variables('dbServer_name'), '/webappAcceess')]",
             "dependsOn": [
                 "[resourceId('Microsoft.DBforMySQL/servers', variables('dbServer_name'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnet_name'), 'snet-webapp')]"
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet_name'))]"
             ],
             "properties": {
                 "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnet_name'), 'snet-webapp')]",
@@ -198,7 +177,7 @@
             "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms', variables('plan_name'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnet_name'), 'snet-webapp')]"
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet_name'))]"
             ],
             "kind": "app,linux",
             "properties": {
@@ -224,7 +203,7 @@
             "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/sites', variables('webapp_name'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnet_name'), 'snet-webapp')]"
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet_name'))]"
             ],
             "properties": {
                 "vnetResourceId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnet_name'), 'snet-webapp')]",
