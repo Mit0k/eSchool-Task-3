@@ -15,22 +15,13 @@ Test-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -TemplateFi
 
 New-AzResourceGroupDeployment -Name $deploymentName -ResourceGroupName $ResourceGroupName -Location $Location `
      -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -prefix $prefix  -databasePassword $databasePassword -Force
-Start-Sleep -s 15
-Write-Host 1
+
 $webappName=(Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.webappName.value
-Write-Host 11
 $WebHost=(Get-AzWebApp -ResourceGroup $ResourceGroupName -Name $webappName).HostNames[0]
-Write-Host 2
-Write-Host 3
-Write-Host 4
 $ServerName=(Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.serverName.value
 $DbUsername=(Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.dbUsername.value
-Write-Host 5
-Write-Host $DbUsername $ServerName $webappName
-Write-Host 6
-Stop-AzWebApp -ResourceGroupName $ResourceGroupName -Name $webappName
-Write-Host 7
 
+Stop-AzWebApp -ResourceGroupName $ResourceGroupName -Name $webappName
 $webapp = Get-AzWebApp -Name $webappName -ResourceGroupName $ResourceGroupName
 $appset = $webapp.SiteConfig.AppSettings
 
