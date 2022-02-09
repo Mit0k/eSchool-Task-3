@@ -16,7 +16,7 @@ Test-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -TemplateFi
 New-AzResourceGroupDeployment -Name $deploymentName -ResourceGroupName $ResourceGroupName -Location $Location `
      -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -prefix $prefix  -databasePassword $databasePassword -Force
 
-$WebHost=(Get-AzWebApp -ResourceGroup $ResourceGroupName -name $webappName).HostNames[0]
+$WebHost=(Get-AzWebApp -ResourceGroup $ResourceGroupName -Name $webappName).HostNames[0]
 Start-Sleep -s 3
 $webappName=(Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.webappName.value
 $ServerName=(Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.ServerName.value
