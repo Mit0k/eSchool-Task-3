@@ -216,11 +216,11 @@
             "type": "string",
             "value": "[variables('webapp_name')]"
         },
-        "ServerName": {
+        "serverName": {
             "type": "string",
             "value":"[variables('dbServer_name')]"
         },
-        "DbUsername": {
+        "dbUsername": {
             "type": "string",
             "value": "[parameters('databaseUsername')]"
         }

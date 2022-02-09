@@ -23,8 +23,8 @@ $WebHost=(Get-AzWebApp -ResourceGroup $ResourceGroupName -Name $webappName).Host
 Write-Host 2
 Write-Host 3
 Write-Host 4
-$ServerName=(Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.ServerName.value
-$DbUsername=(Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.DbUsername.value
+$ServerName=(Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.serverName.value
+$DbUsername=(Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.dbUsername.value
 Write-Host 5
 Write-Host $DbUsername $ServerName $webappName
 Write-Host 6
