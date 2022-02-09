@@ -31,7 +31,7 @@ stages:
         
         - task: AzurePowerShell@5 
           inputs:
-            azureSubscription: 'Azure1'
+            azureSubscription: 'Azure2'
             ScriptType: 'FilePath'
             ScriptPath: 'templates/azuredeploy.ps1'
             ScriptArguments: -Location ${env:LOCATION} -ResourceGroupName ${env:GROUP} -DatabasePassword $env:MAPPED_ENV_DB_PASS -TemplateFile templates\azuredeploy.json -TemplateParameterFile templates\azuredeploy.parameters.json
