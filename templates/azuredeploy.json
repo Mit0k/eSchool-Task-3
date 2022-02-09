@@ -63,7 +63,7 @@
     "resources": [
         {
             "type": "Microsoft.DBforMySQL/servers",
-            "dependsOn": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnet_name'))]",
+            "dependsOn":[ "[resourceId('Microsoft.Network/virtualNetworks',variables('vnet_name'))]"],
             "apiVersion": "2017-12-01",
             "name": "[variables('dbServer_name')]",
             "location": "[parameters('location')]",
