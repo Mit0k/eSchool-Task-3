@@ -13,8 +13,8 @@ $DatabasePassword = ConvertTo-SecureString $DatabasePassword  -AsPlainText -Forc
 New-AzResourceGroup -Name $ResourceGroupName -Location $Location -Force
 Test-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -Location $Location
 
-New-AzResourceGroupDeployment -Name $deploymentName -ResourceGroupName $ResourceGroupName -prefix $prefix`
-     -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -databasePassword $databasePassword -Location $Location -Force
+New-AzResourceGroupDeployment -Name $deploymentName -ResourceGroupName $ResourceGroupName -Location $Location `
+     -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -databasePassword $databasePassword  -prefix $prefix -Force
 
 $webappName = (Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.webappName.value
 $ServerName = (Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.dbName.value
