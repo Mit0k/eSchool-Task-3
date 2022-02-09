@@ -21,16 +21,6 @@ $ServerName = (Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupNa
 $DbUsername = (Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.dbUsername.value
 Write-Host $DbUsername ----
 
-$OutboundIpAddresses=(Get-AzWebApp -ResourceGroup $ResourceGroupName -Name $webappName).OutboundIpAddresses -split ','
-$WebHost=(Get-AzWebApp -ResourceGroup $ResourceGroupName -Name $webappName).HostNames[0]
-
-
-$counter = 0
-Foreach ($Ip in $OutboundIpAddresses) {
-    New-AzMySqlFirewallRule -ResourceGroupName $ResourceGroupName -Name "rule$counter" -ServerName $ServerName -EndIPAddress $Ip -StartIPAddress $Ip 
-    $counter++
-}
-
 Stop-AzWebApp -ResourceGroupName $ResourceGroupName -Name $webappName
 
 

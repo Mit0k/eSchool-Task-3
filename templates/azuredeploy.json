@@ -210,5 +210,19 @@
                 "isSwift": true
             }
         }
-    ]
+    ],
+    "outputs": {
+        "webappName": {
+            "type": "string",
+            "value": "[variables('webapp_name')]"
+        },
+        "ServerName": {
+            "type": "string",
+            "value":"[variables('dbServer_name')]"
+        },
+        "DbUsername": {
+            "type": "string",
+            "value": "[parameters('databaseUsername')]"
+        }
+    }
 }
