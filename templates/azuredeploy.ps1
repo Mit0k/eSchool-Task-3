@@ -1,8 +1,8 @@
 param($Location, $ResourceGroupName, $DatabasePassword, $TemplateFile, $TemplateParameterFile, $prefix)
 
  if (!$prefix) {
-    Write-Host 'Using default name preffix'
-    $preffix = 'armgen'
+    Write-Host 'Using default name prefix'
+    $prefix = 'armgen'
 }
 
 $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
@@ -13,7 +13,7 @@ $DatabasePassword = ConvertTo-SecureString $DatabasePassword  -AsPlainText -Forc
 New-AzResourceGroup -Name $ResourceGroupName -Location $Location -Force
 Test-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -Location $Location
 
-New-AzResourceGroupDeployment -Name $deploymentName -ResourceGroupName $ResourceGroupName `
+New-AzResourceGroupDeployment -Name $deploymentName -ResourceGroupName $ResourceGroupName -prefix $prefix`
      -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -databasePassword $databasePassword -Location $Location -Force
 
 $webappName = (Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.webappName.value
@@ -21,8 +21,8 @@ $ServerName = (Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupNa
 $DbUsername = (Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.dbUsername.value
 Write-Host $DbUsername ----
 
-$OutboundIpAddresses=(Get-AzWebApp -ResourceGroup $ResourceGroupName -name $webappName).OutboundIpAddresses -split ','
-$WebHost=(Get-AzWebApp -ResourceGroup $ResourceGroupName -name $webappName).HostNames[0]
+$OutboundIpAddresses=(Get-AzWebApp -ResourceGroup $ResourceGroupName -Name $webappName).OutboundIpAddresses -split ','
+$WebHost=(Get-AzWebApp -ResourceGroup $ResourceGroupName -Name $webappName).HostNames[0]
 
 
 $counter = 0
