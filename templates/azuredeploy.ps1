@@ -21,7 +21,7 @@ $ServerName=(Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName
 $DbUsername=(Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.DbUsername.value
 $WebHost=(Get-AzWebApp -ResourceGroup $ResourceGroupName -name $webappName).HostNames[0]
 
-Write-Host $DbUsername ----
+Write-Host $DbUsername $ServerName $webappName
 
 Stop-AzWebApp -ResourceGroupName $ResourceGroupName -Name $webappName
 
