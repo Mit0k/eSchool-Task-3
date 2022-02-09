@@ -4,7 +4,7 @@ if (!$prefix) {
     Write-Host 'Using default name prefix'
     $prefix = 'armgen'
 }
-
+Write-Host $prefix
 $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
 $deploymentName="WebAppDeploy"+"${today}"
 
