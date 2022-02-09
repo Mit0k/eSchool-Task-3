@@ -1,6 +1,6 @@
 param($Location, $ResourceGroupName, $DatabasePassword, $TemplateFile, $TemplateParameterFile, $prefix)
 
- if (!$prefix) {
+if (!$prefix) {
     Write-Host 'Using default name prefix'
     $prefix = 'armgen'
 }

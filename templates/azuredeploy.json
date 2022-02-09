@@ -8,14 +8,14 @@
                 "uniqueName": {
                     "parameters": [
                         {"name": "resourceName", "type": "string"},
-                        {"name": "preffix" , "type": "string"},
+                        {"name": "prefix" , "type": "string"},
                         {"name": "location", "type" : "string"}],
                 "output": {
                     "type": "string",
-                    "value": "[toLower(concat(parameters('resourceName'),'-',parameters('preffix'),'-',parameters('location')))]"}}}
+                    "value": "[toLower(concat(parameters('resourceName'),'-',parameters('prefix'),'-',parameters('location')))]"}}}
     }],
     "parameters": {
-        "preffix": {
+        "prefix": {
             "type": "string"
         },
         "location": {
@@ -30,15 +30,15 @@
         }
     },
     "variables": {
-        "plan_name":        "[helpers.uniqueName('plan',parameters('preffix'),parameters('location'))]",
+        "plan_name":        "[helpers.uniqueName('plan',parameters('prefix'),parameters('location'))]",
         "plan_sku": {
                             "name": "S1",
                             "tier": "Standard",
                             "size": "S1",
                             "family": "S",
                             "capacity": 1},
-        "webapp_name":      "[helpers.uniqueName('app',parameters('preffix'),parameters('location'))]",
-        "dbServer_name":    "[helpers.uniqueName('db',parameters('preffix'),parameters('location'))]",
+        "webapp_name":      "[helpers.uniqueName('app',parameters('prefix'),parameters('location'))]",
+        "dbServer_name":    "[helpers.uniqueName('db',parameters('prefix'),parameters('location'))]",
         "db_sku": {
                             "name": "GP_Gen5_4",
                             "tier": "GeneralPurpose",
@@ -58,7 +58,7 @@
                             "minimalTlsVersion": "TLSEnforcementDisabled",
                             "infrastructureEncryption": "Disabled",
                             "publicNetworkAccess": "Enabled"},
-        "vnet_name":"[helpers.uniqueName('vnet',parameters('preffix'),parameters('location'))]"
+        "vnet_name":"[helpers.uniqueName('vnet',parameters('prefix'),parameters('location'))]"
     },
     "resources": [
         {
