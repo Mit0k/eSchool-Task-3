@@ -17,8 +17,8 @@ New-AzResourceGroupDeployment -Name $deploymentName -ResourceGroupName $Resource
      -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -prefix $prefix  -databasePassword $databasePassword -Force
 
 $webappName = (Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.webappName.value
-$ServerName = (Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.dbName.value
-$DbUsername = (Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.dbUsername.value
+$ServerName = (Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.ServerName.value
+$DbUsername = (Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.DbUsername.value
 Write-Host $DbUsername ----
 
 Stop-AzWebApp -ResourceGroupName $ResourceGroupName -Name $webappName
