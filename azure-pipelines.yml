@@ -68,10 +68,10 @@ stages:
             inlineScript: |
               $variableGroups=(az pipelines variable-group list)
               $jsonObj = $variableGroups | ConvertFrom-Json
-              if ($jsonObj.name -contains "VG-$(prefix)") {
+              if ($jsonObj.name -contains "VG-${env.prefix}") {
                 Write-Host "Variable group exist"
                 Write-Host "##vso[task.setvariable variable=variableGroupsNotExist;]true"
-                $index = $jsonObj.name.IndexOf("VG-$(prefix)")
+                $index = $jsonObj.name.IndexOf("VG-${env.prefix}")
                 $VG_id = $jsonObj.id[$index]
                 Write-Host "##vso[task.setvariable variable=VG_id;]$VG_id"}
               else
@@ -86,7 +86,6 @@ stages:
           inputs:
             azureSubscription: 'Azure2'
             scriptType: 'bash'
-            continueOnError: true
             scriptLocation: 'inlineScript'
             inlineScript: |
               az pipelines variable-group create --organization=$(ORG) --project=$(PROJECT) \
@@ -98,7 +97,6 @@ stages:
           inputs:
             azureSubscription: 'Azure2'
             scriptType: 'bash'
-            continueOnError: true
             scriptLocation: 'inlineScript'
             inlineScript: |
               az pipelines variable-group variable create --id $(VG_id) --name ResourceGroupName --value $(GROUP)
