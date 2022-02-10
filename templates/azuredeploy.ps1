@@ -72,5 +72,4 @@ Set-AzWebApp -ResourceGroupName $ResourceGroupName -Name $webappName  -AppSettin
 $webapp = Get-AzWebApp -Name $webappName -ResourceGroupName $ResourceGroupName
 
 $webapp.SiteConfig.AppSettings
-$output=$webappName
-##vso[task.setvariable variable=output]$output'
+##vso[task.setvariable variable=output]$webappName
