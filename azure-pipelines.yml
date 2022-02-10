@@ -46,7 +46,7 @@ stages:
 
   - stage: Create_variables_group
     variables:
-      WebAppName: stageDependencies.Deploying_infrastructure.ARM_Template_deploying.outputs['PS_Deployment.WebAppName']
+      webappName: stageDependencies.Deploying_infrastructure.ARM_Template_deploying.outputs['PS_Deployment.webappName']
     jobs:
       - job:
         steps:
@@ -105,6 +105,7 @@ stages:
             scriptType: 'bash'
             scriptLocation: 'inlineScript'
             inlineScript: |
-              az pipelines variable-group variable create --id $(VG_id) --name ResourceGroupName --value $(GROUP)
-              az pipelines variable-group variable create --id $(VG_id) --name WebAppName --value $(webappName)
+              echo $(webappName)
+              az pipelines variable-group variable update --id $(VG_id) --name ResourceGroupName --value $(GROUP)
+              az pipelines variable-group variable update --id $(VG_id) --name WebAppName --value $(webappName)
     
