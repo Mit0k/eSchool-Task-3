@@ -1,4 +1,8 @@
 variables:
+  location: "eastus"
+  groupName: "eschool-armt"
+  prefix : "armtest"
+
   PROJECT: $(System.TeamProject)
   ORG: $(System.TeamFoundationCollectionUri)
   variableGroupsNotExist: ""
@@ -39,15 +43,15 @@ stages:
             azureSubscription: 'Azure2'
             ScriptType: 'FilePath'
             ScriptPath: 'templates/azuredeploy.ps1'
-            ScriptArguments: -Location ${env:LOCATION} -ResourceGroupName ${env:GROUP} -prefix ${env:prefix} -DatabasePassword $env:MAPPED_ENV_DB_PASS -TemplateFile templates\azuredeploy.json -TemplateParameterFile templates\azuredeploy.parameters.json
+            ScriptArguments: -Location ${env:location} -ResourceGroupName ${env:groupName} -prefix ${env:prefix} -DatabasePassword $env:MAPPED_ENV_DB_PASS -TemplateFile templates\azuredeploy.json -TemplateParameterFile templates\azuredeploy.parameters.json
             azurePowerShellVersion: 'LatestVersion'
           env:
             MAPPED_ENV_DB_PASS: $(DatabasePassword)
-        - bash: echo $(webappName)
 
   - stage: Create_variables_group
     variables:
       webappName: $[ stageDependencies.Deploying_infrastructure.ARM_Template_deploying.outputs['PS_Deployment.webappName'] ]
+      groupName: $[ stageDependencies.Deploying_infrastructure.ARM_Template_deploying.outputs['PS_Deployment.Group'] ]
     jobs:
       - job:
         steps:
@@ -72,17 +76,13 @@ stages:
             inlineScript: |
               $variableGroups=(az pipelines variable-group list)
               $jsonObj = $variableGroups | ConvertFrom-Json
-              Write-Host "VG-${env:prefix}"
               if ($jsonObj.name -contains "VG-${env:prefix}") {
-                Write-Host 'Here1'
-                Write-Host "Variable group exist"
                 Write-Host "##vso[task.setvariable variable=variableGroupsNotExist;]false"
                 $index = $jsonObj.name.IndexOf("VG-${env:prefix}")
                 $VG_id = $jsonObj.id[$index]
                 Write-Host "##vso[task.setvariable variable=VG_id;]$VG_id"}
               else
               {
-                Write-Host 'Here2'
                 Write-Host "##vso[task.setvariable variable=variableGroupsNotExist;]true"
               }
            
@@ -96,7 +96,7 @@ stages:
             scriptLocation: 'inlineScript'
             inlineScript: |
               az pipelines variable-group create --organization=$(ORG) --project=$(PROJECT) \
-              --name VG-$(prefix) --variables ResourceGroupName=$(GROUP) \
+              --name VG-$(prefix) --variables ResourceGroupName=$(groupName) \
                                         WebAppName=$(webappName)
                                           
         - task: AzureCLI@2
@@ -106,7 +106,6 @@ stages:
             scriptType: 'bash'
             scriptLocation: 'inlineScript'
             inlineScript: |
-              echo $(webappName)
-              az pipelines variable-group variable update --id $(VG_id) --name ResourceGroupName --value $(GROUP)
+              az pipelines variable-group variable update --id $(VG_id) --name ResourceGroupName --value $(groupName)
               az pipelines variable-group variable update --id $(VG_id) --name WebAppName --value $(webappName)
     
