@@ -5,8 +5,8 @@ if (!$prefix) {
     $prefix = 'armgen'
 }
 
-if (!$ResourceGroup.StartsWith("rg")) {
-    $ResourceGroup = "rg-"+$ResourceGroup+"-"+$Location
+if (!$ResourceGroupName.StartsWith("rg")) {
+    $ResourceGroupName = "rg-"+$ResourceGroupName+"-"+$Location
 }
 Write-Host $prefix
 $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
