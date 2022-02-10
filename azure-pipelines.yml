@@ -1,7 +1,6 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+variables:
+  PROJECT: $(System.TeamProject)
+  ORG: $(System.TeamFoundationCollectionUri)
 
 trigger:
   - master
@@ -10,9 +9,9 @@ pool:
   vmImage: 'windows-latest'
   
 stages:
-  - stage: ARM_CI
+  - stage: ARM_Testing
     jobs:
-    - job: ARM_Testing
+    - job: ARMTTK
       steps:
         - task: RunARMTTKTests@1
           displayName: Run ARM TTK tests 
@@ -28,13 +27,17 @@ stages:
             testResultsFormat: 'NUnit'
             testResultsFiles: '$(System.DefaultWorkingDirectory)\results\*-armttk.xml'
           condition: always()
-        
+
+  - stage: Deploying_infrastructure
+    jobs:
+    - job: ARM_Template_deploying
+      steps:       
         - task: AzurePowerShell@5 
           inputs:
             azureSubscription: 'Azure2'
             ScriptType: 'FilePath'
             ScriptPath: 'templates/azuredeploy.ps1'
-            ScriptArguments: -Location ${env:LOCATION} -ResourceGroupName ${env:GROUP} -prefix ${env:prefix} -DatabasePassword $env:MAPPED_ENV_DB_PASS -TemplateFile templates\azuredeploy.json -TemplateParameterFile templates\azuredeploy.parameters.json
+            ScriptArguments: -Location ${env:LOCATION} -ResourceGroupName ${env:GROUP} -prefix ${env:prefix} -DatabasePassword $env:MAPPED_ENV_DB_PASS -outputWebAppName $output -TemplateFile templates\azuredeploy.json -TemplateParameterFile templates\azuredeploy.parameters.json
             azurePowerShellVersion: 'LatestVersion'
           env:
             MAPPED_ENV_DB_PASS: $(DatabasePassword)
