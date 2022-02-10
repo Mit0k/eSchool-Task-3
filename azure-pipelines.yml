@@ -58,16 +58,49 @@ stages:
           env:
             AZURE_DEVOPS_EXT_PAT: $(AzDevOpsCli-Token)
     
-    
         - task: AzureCLI@2
+          continueOnError: true
+          inputs:
+            azureSubscription: 'Azure2'
+            scriptType: 'ps'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+            $variableGroups=(az pipelines variable-group list)
+            $jsonObj = $jsonString | ConvertFrom-Json
+            if ($jsonObj.name -contains "VG-$(prefix)") {
+              Write-Host "Variable group exist"
+              Write-Host "##vso[task.setvariable variable=variableGroupsNotExist]false"}
+              $index = $jsonObj.name.IndexOf("VG-$(prefix)")
+              $VG_id = $jsonObj.id[$index]
+              Write-Host "##vso[task.setvariable variable=VG_id]$VG_id"}
+
+            else
+            {
+              Write-Host "##vso[task.setvariable variable=variableGroupsNotExist]true"}
+            }
+           
+
+  
+        - task: AzureCLI@2
+          condition: ne($variableGroupsNotExist, false)
           inputs:
             azureSubscription: 'Azure2'
             scriptType: 'bash'
+            continueOnError: true
             scriptLocation: 'inlineScript'
             inlineScript: |
               az pipelines variable-group create --organization=$(ORG) --project=$(PROJECT) \
-              --name prefix --variables ResourceGroupName=$(GROUP) \
+              --name VG-$(prefix) --variables ResourceGroupName=$(GROUP) \
                                         WebAppName=$(webappName)
-    
-    
+                                          
+        - task: AzureCLI@2
+          condition: ne($variableGroupsNotExist, true)
+          inputs:
+            azureSubscription: 'Azure2'
+            scriptType: 'bash'
+            continueOnError: true
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              az pipelines variable-group variable create --id $(VG_id) --name ResourceGroupName --value $(GROUP)
+              az pipelines variable-group variable create --id $(VG_id) --name WebAppName --value $(webappName)
     
