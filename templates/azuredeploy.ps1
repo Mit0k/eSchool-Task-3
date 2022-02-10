@@ -6,7 +6,7 @@ if (!$prefix) {
 }
 
 if (!$ResourceGroup.StartsWith("rg")) {
-    $ResourceGroup = "rg-"+$ResourceGroup"-"+$Location
+    $ResourceGroup = "rg-"+$ResourceGroup+"-"+$Location
 }
 Write-Host $prefix
 $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
