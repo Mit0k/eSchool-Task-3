@@ -70,10 +70,12 @@ stages:
             inlineScript: |
               $variableGroups=(az pipelines variable-group list)
               $jsonObj = $variableGroups | ConvertFrom-Json
-              if ($jsonObj.name -contains "VG-${env.prefix}") {
+              Write-Host "VG-${env:prefix}"
+              if ($jsonObj.name -contains "VG-${env:prefix}") {
+                Write-Host 'Here1'
                 Write-Host "Variable group exist"
                 Write-Host "##vso[task.setvariable variable=variableGroupsNotExist;]true"
-                $index = $jsonObj.name.IndexOf("VG-${env.prefix}")
+                $index = $jsonObj.name.IndexOf("VG-${env:prefix}")
                 $VG_id = $jsonObj.id[$index]
                 Write-Host "##vso[task.setvariable variable=VG_id;]$VG_id"}
               else
