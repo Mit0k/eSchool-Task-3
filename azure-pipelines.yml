@@ -70,14 +70,14 @@ stages:
               $jsonObj = $jsonString | ConvertFrom-Json
               if ($jsonObj.name -contains "VG-$(prefix)") {
                 Write-Host "Variable group exist"
-                Write-Host "##vso[task.setvariable variable=variableGroupsNotExist]true"}
+                Write-Host "##vso[task.setvariable variable=variableGroupsNotExist]true"
                 $index = $jsonObj.name.IndexOf("VG-$(prefix)")
                 $VG_id = $jsonObj.id[$index]
-                Write-Host "##vso[task.setvariable variable=VG_id]$VG_id"}
+                Write-Host "##vso[task.setvariable variable=VG_id]$VG_id"
 
               else
               {
-                Write-Host "##vso[task.setvariable variable=variableGroupsNotExist]false"}
+                Write-Host "##vso[task.setvariable variable=variableGroupsNotExist]false"
               }
            
 
