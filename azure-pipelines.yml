@@ -34,6 +34,7 @@ stages:
     - job: ARM_Template_deploying
       steps:       
         - task: AzurePowerShell@5 
+          name: PS_Deployment
           inputs:
             azureSubscription: 'Azure2'
             ScriptType: 'FilePath'
@@ -45,7 +46,7 @@ stages:
 
   - stage: Create_variables_group
     variables:
-      WebAppName: dependencies.Deploying_infrastructure.outputs['ARM_Template_deploying.AzurePowerShell.WebAppName']
+      WebAppName: stageDependencies.Deploying_infrastructure.ARM_Template_deploying.outputs['PS_Deployment.WebAppName']
     jobs:
       - job:
         steps:
