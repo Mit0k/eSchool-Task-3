@@ -42,4 +42,32 @@ stages:
           env:
             MAPPED_ENV_DB_PASS: $(DatabasePassword)
 
-        - bash: echo fucker $(output)
+        - stage: Create_variables_group
+        jobs:
+        - job:
+          steps:
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'Azure2'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az devops configure --defaults organization=$(ORG) project=$(PROJECT)
+                echo  $AZURE_DEVOPS_EXT_PAT | az devops login --organization $(ORG)
+              failOnStandardError: true
+            env:
+              AZURE_DEVOPS_EXT_PAT: $(AzDevOpsCli-Token)
+    
+    
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'Azure2'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az pipelines variable-group create --organization=$(ORG) --project=$(PROJECT) \
+                --name prefix --variables ResourceGroupName=$(GROUP) \
+                                          WebAppName=$(webappName)
+    
+    
+    
