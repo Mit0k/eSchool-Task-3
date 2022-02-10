@@ -55,7 +55,7 @@
                             },
                             "version": "5.7",
                             "sslEnforcement": "Enabled",
-                            "minimalTlsVersion": "TLSEnforcementDisabled",
+                            "minimalTlsVersion": "TLS1_2",
                             "infrastructureEncryption": "Disabled",
                             "publicNetworkAccess": "Enabled"},
         "vnet_name":"[helpers.uniqueName('vnet',parameters('prefix'),parameters('location'))]"

@@ -35,7 +35,7 @@ $profile = new-object Microsoft.Azure.Management.WebSites.Models.NameValuePair
 
 
 $url.Name = "DATASOURCE_URL"
-$url.Value = "jdbc:mysql://${ServerName}.mysql.database.azure.com:3306/eschool?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=true"
+$url.Value = "jdbc:mysql://${ServerName}.mysql.database.azure.com:3306/eschool?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=true&enabledTLSProtocols=TLSv1.2"
 $appset.Add($url)
 
 $user.Name = "DATASOURCE_USERNAME"
