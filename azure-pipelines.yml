@@ -42,4 +42,4 @@ stages:
           env:
             MAPPED_ENV_DB_PASS: $(DatabasePassword)
 
-        - bash: echo fucker $OUTPUT
+        - bash: echo fucker $(output)
