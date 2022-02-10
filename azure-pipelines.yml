@@ -41,3 +41,5 @@ stages:
             azurePowerShellVersion: 'LatestVersion'
           env:
             MAPPED_ENV_DB_PASS: $(DatabasePassword)
+
+        - bash: $OUTPUT
