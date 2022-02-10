@@ -43,6 +43,7 @@ stages:
             azurePowerShellVersion: 'LatestVersion'
           env:
             MAPPED_ENV_DB_PASS: $(DatabasePassword)
+        - bash: echo $webappName
 
   - stage: Create_variables_group
     variables:
