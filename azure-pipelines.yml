@@ -96,8 +96,8 @@ stages:
             scriptLocation: 'inlineScript'
             inlineScript: |
               az pipelines variable-group create --organization=$(ORG) --project=$(PROJECT) \
-              --name VG-$(prefix) --variables ResourceGroupName=$(groupName) \
-                                        WebAppName=$(webappName)
+              --name VG-$(prefix) --authorize true \
+              --variables ResourceGroupName=$(groupName) WebAppName=$(webappName)
                                           
         - task: AzureCLI@2
           condition: eq(variables.variableGroupsNotExist, 'false')
