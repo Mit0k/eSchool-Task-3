@@ -46,7 +46,7 @@ stages:
 
   - stage: Create_variables_group
     variables:
-      webappName: stageDependencies.Deploying_infrastructure.ARM_Template_deploying.outputs['PS_Deployment.webappName']
+      webappName: $[ stageDependencies.Deploying_infrastructure.ARM_Template_deploying.outputs['PS_Deployment.webappName'] ]
     jobs:
       - job:
         steps:
