@@ -73,3 +73,5 @@ $webapp = Get-AzWebApp -Name $webappName -ResourceGroupName $ResourceGroupName
 
 $webapp.SiteConfig.AppSettings
 Write-Host "##vso[task.setvariable variable=webappName;isOutput=true]$webappName"
+Write-Host "##vso[task.setvariable variable=groupName;isOutput=true]$ResourceGroupName"
+
