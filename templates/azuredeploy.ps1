@@ -1,4 +1,4 @@
-param($Location, $ResourceGroupName, $DatabasePassword, $TemplateFile, $TemplateParameterFile, $prefix)
+param($Location, $ResourceGroupName, $DatabasePassword, $TemplateFile, $TemplateParameterFile, $prefix, $outputWebAppName)
 
 if (!$prefix) {
     Write-Host 'Using default name prefix'
@@ -72,3 +72,5 @@ Set-AzWebApp -ResourceGroupName $ResourceGroupName -Name $webappName  -AppSettin
 $webapp = Get-AzWebApp -Name $webappName -ResourceGroupName $ResourceGroupName
 
 $webapp.SiteConfig.AppSettings
+
+$outputWebAppName=$webappName
