@@ -1,6 +1,7 @@
 variables:
   PROJECT: $(System.TeamProject)
   ORG: $(System.TeamFoundationCollectionUri)
+  variableGroupsNotExist: ""
 
 trigger:
   - master
