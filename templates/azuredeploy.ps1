@@ -1,24 +1,81 @@
-param($Location, $ResourceGroupName, $DatabasePassword, $TemplateFile, $TemplateParameterFile, $prefix, $outputWebAppName)
+###-----------------------------------------------------------
+$Location='eastus'
+$ResourceGroupName='fucker'
+$DatabasePassword='Tester00__'
+$TemplateFile='C:\Users\mitok\source\repos\ArmWebAppSDB\eschool-webappSDB\templates\azuredeploy.json'
+$TemplateParameterFile='C:\Users\mitok\source\repos\ArmWebAppSDB\eschool-webappSDB\templates\azuredeploy.parameters.json'
+$prefix='fucku'
+$KvResourceGroupName='rg-secrets-eastus'
+$keyvaultName = 'kv-secrests-eastus'
+$KvLocation = 'East US'
+###
+###-------------------------------------------------------------
+#param($Location, $ResourceGroupName, $DatabasePassword, $TemplateFile, $TemplateParameterFile, $prefix, $KvResourceGroupName)
 
 if (!$prefix) {
     Write-Host 'Using default name prefix'
     $prefix = 'armgen'
 }
-
+if (!$KvResourceGroupName) {
+    Write-Host 'Using default resource group for keyvault'
+    $KvResourceGroupName = 'armgen'
+}
+if (!$KvLocation) {
+    Write-Host 'Using default keyvault location'
+    $KvLocation = $Location
+}
+if (!$keyvaultName) {
+    Write-Host 'Using default keyvault name'
+    $keyvaultName = 'kv-'+$prefix+$KvLocation
+}
 if (!$ResourceGroupName.StartsWith("rg")) {
     $ResourceGroupName = "rg-"+$ResourceGroupName+"-"+$Location
 }
-Write-Host $prefix
+
+Get-AzResourceGroup -Name $ResourceGroupName -ErrorVariable $notPresent
+if (!$notPresent)
+{
+    New-AzResourceGroup -Name $ResourceGroupName -Location $Location
+}
+
+
+$notPresent=(Get-AzKeyVault -VaultName $keyvaultName)
+if (!$notPresent){
+    $InRemovedState=(Get-AzKeyVault -VaultName $keyvaultName -InRemovedState -Location $KvLocation) 
+    if ($InRemovedState) {
+        Write-Host "In removed state"
+        exit
+    }
+    New-AzKeyVault -Name $keyvaultName -ResourceGroupName $KvResourceGroupName -Location $KvLocation
+    $secretvalue = ConvertTo-SecureString (-join ((48..57) + (97..122) | Get-Random -Count 32 | % {[char]$_})) -AsPlainText -Force
+    Set-AzKeyVaultSecret -VaultName $keyvaultName -Name 'functionKey' -SecretValue $secretvalue
+}
+else{if (!$secret) {
+        $secretvalue = ConvertTo-SecureString (-join ((48..57) + (97..122) | Get-Random -Count 32 | % {[char]$_})) -AsPlainText -Force
+        Set-AzKeyVaultSecret -VaultName $keyvaultName -Name 'functionKey' -SecretValue (ConvertTo-SecureString (-join ((48..57) + (97..122) | Get-Random -Count 32 | % {[char]$_})) -AsPlainText -Force)
+}}
+
+$secret = Get-AzKeyVaultSecret -VaultName $keyvaultName -Name 'functionKey' -AsPlainText
+$secret = ConvertTo-SecureString $secret  -AsPlainText -Force
+
 $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
 $deploymentName="WebAppDeploy"+"${today}"
 
 $DatabasePassword = ConvertTo-SecureString $DatabasePassword  -AsPlainText -Force
 
-New-AzResourceGroup -Name $ResourceGroupName -Location $Location -Force
-Test-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -Location $Location
+
+
+$notValid = Test-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -ErrorVariable notValid -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -Location $Location 5>&1 
+if ($notValid) {
+    Write-Host $notValid.Message
+    Write-Host "Template is not valid according to the validation procedure\n Use Get-AzLog -CorrelationId <correlationId> for more info"
+    exit
+}
 
 New-AzResourceGroupDeployment -Name $deploymentName -ResourceGroupName $ResourceGroupName -Location $Location `
-     -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -prefix $prefix  -databasePassword $databasePassword -Force
+     -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile `
+     -prefix $prefix  -databasePassword $databasePassword `
+     -functionHostKey $secret -Force
 
 $webappName=(Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.webappName.value
 $WebHost=(Get-AzWebApp -ResourceGroup $ResourceGroupName -Name $webappName).HostNames[0]

@@ -1,0 +1,32 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "keyVaultName": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            },
+            "defaultValue" : "kv-secrests-eastus"
+        }
+    },
+    "functions": [],
+    "variables": {},
+    "resources": [],
+    "outputs": {
+        "output12": {
+            "type": "string",
+            "value": "[reference('/subscriptions/631ae502-2bd8-4643-8877-a254f0865873/resourceGroups/rg-secrets-eastus/providers/Microsoft.KeyVault/vaults/kv-secrests-eastus/secrets/functionKey', '2018-02-14').secretUriWithVersion]"
+        },
+        "output1": {
+            "type": "string",
+            "value": ""
+            //"value": "[concat('@Microsoft.KeyVault(SecretUri=', reference(resourceId('Microsoft.KeyVault/vaults/secrets', 'kv-secrests-eastus', 'functionKey'), '2018-02-14').secretUriWithVersion, ')')]"
+        },
+        "output13": {
+            "type": "string",
+            "value": "[concat('@Microsoft.KeyVault(SecretUri=', reference('/subscriptions/631ae502-2bd8-4643-8877-a254f0865873/resourceGroups/rg-secrets-eastus/providers/Microsoft.KeyVault/vaults/kv-secrests-eastus/secrets/functionKey', '2018-02-14').secretUriWithVersion, ')')]"
+
+        }
+    }
+}

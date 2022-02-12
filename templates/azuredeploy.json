@@ -27,25 +27,36 @@
         },
         "databasePassword": {
             "type": "securestring"
+        },
+        "cpuThreshold": {
+            "type": "int",
+            "metadata": {
+                "description": "description"
+            },
+            "defaultValue": 75
+        },
+        "functionHostKey": {
+            "type": "securestring"
         }
     },
     "variables": {
-        "plan_name":        "[helpers.uniqueName('plan',parameters('prefix'),parameters('location'))]",
-        "plan_sku": {
+        "planName":        "[helpers.uniqueName('plan',parameters('prefix'),parameters('location'))]",
+        "planSKU": {
                             "name": "S1",
                             "tier": "Standard",
                             "size": "S1",
                             "family": "S",
                             "capacity": 1},
-        "webapp_name":      "[helpers.uniqueName('app',parameters('prefix'),parameters('location'))]",
-        "dbServer_name":    "[helpers.uniqueName('db',parameters('prefix'),parameters('location'))]",
-        "db_sku": {
+        "webAppName":      "[helpers.uniqueName('app',parameters('prefix'),parameters('location'))]",
+        "projectDatabaseName" : "eschool",
+        "dbServerName":    "[helpers.uniqueName('db',parameters('prefix'),parameters('location'))]",
+        "dbSKU": {
                             "name": "GP_Gen5_4",
                             "tier": "GeneralPurpose",
                             "family": "Gen5",
                             "capacity": 4},
-        "db_properties": {
-                             "administratorLogin": "[parameters('databaseUsername')]",
+        "dbProperties": {
+                            "administratorLogin": "[parameters('databaseUsername')]",
                             "administratorLoginPassword": "[parameters('databasePassword')]",
                             "storageProfile": {
                                 "storageMB": 102400,
@@ -58,34 +69,46 @@
                             "minimalTlsVersion": "TLS1_2",
                             "infrastructureEncryption": "Disabled",
                             "publicNetworkAccess": "Enabled"},
-        "vnet_name":"[helpers.uniqueName('vnet',parameters('prefix'),parameters('location'))]"
+        "vnetName":"[helpers.uniqueName('vnet',parameters('prefix'),parameters('location'))]",
+        "autoscalesettingsName": "autoscalesettings_webapp",
+        "alertAppName": "[helpers.uniqueName('func',parameters('prefix'),parameters('location'))]",
+        "alertAppPlanName": "[helpers.uniqueName('plan-func',parameters('prefix'),parameters('location'))]",
+        "alertFunctionName": "[concat(variables('alertAppName'), '/SlackTrigger')]",
+        "metricAlertsName": "[helpers.uniqueName('metric_alert',parameters('prefix'),parameters('location'))]",
+        "actionGroupsName": "[concat('ag-',parameters('location'))]",
+        "vnetAddressPrefixes": "10.2.0.0/16",
+        "snetName": "[concat('snet-',parameters('prefix'))]",
+        "snetAddressPrefix": "10.2.1.0/24",
+        "increaseThreshold": 50,
+        "decreaseThreshold": 40
+
     },
     "resources": [
         {
             "type": "Microsoft.DBforMySQL/servers",
-            "dependsOn":[ "[resourceId('Microsoft.Network/virtualNetworks',variables('vnet_name'))]"],
+            "dependsOn":[ "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]"],
             "apiVersion": "2017-12-01",
-            "name": "[variables('dbServer_name')]",
+            "name": "[variables('dbServerName')]",
             "location": "[parameters('location')]",
-            "sku": "[variables('db_sku')]",
-            "properties": "[variables('db_properties')]"
+            "sku": "[variables('dbSKU')]",
+            "properties": "[variables('dbProperties')]"
         },
         {
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2020-11-01",
-            "name": "[variables('vnet_name')]",
+            "name": "[variables('vnetName')]",
             "location": "[parameters('location')]",
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
-                        "10.2.0.0/16"
+                        "[variables('vnetAddressPrefixes')]"
                     ]
                 },
                 "subnets": [
                     {
-                        "name": "snet-webapp",
+                        "name": "[variables('snetName')]",
                         "properties": {
-                            "addressPrefix": "10.2.1.0/24",
+                            "addressPrefix": "[variables('snetAddressPrefix')]",
                             "serviceEndpoints": [
                                 {
                                     "service": "Microsoft.Sql",
@@ -113,9 +136,9 @@
         {
             "type": "Microsoft.Web/serverfarms",
             "apiVersion": "2021-02-01",
-            "name": "[variables('plan_name')]",
+            "name": "[variables('planName')]",
             "location": "[parameters('location')]",
-            "sku": "[variables('plan_sku')]",
+            "sku": "[variables('planSKU')]",
             "kind": "linux",
             "properties": {
                 "perSiteScaling": false,
@@ -133,92 +156,314 @@
         {
             "type": "Microsoft.Web/sites/config",
             "apiVersion": "2021-02-01",
-            "name": "[concat(variables('webapp_name'), '/web')]",
+            "name": "[concat(variables('webAppName'), '/web')]",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', variables('webapp_name'))]"
+                "[resourceId('Microsoft.Web/sites', variables('webAppName'))]"
             ],
             "properties": {
                 "numberOfWorkers": 1,
                 "linuxFxVersion": "JAVA|8-jre8",
-                "publishingUsername": "$app-testmitok",
                 "alwaysOn": true,
-                "appCommandLine": "java -jar /home/site/wwwroot/eschool.jar",
+                //"appCommandLine": "java -jar /home/site/wwwroot/eschool.jar",
                 "managedPipelineMode": "Integrated",
-                "virtualApplications": [
-                    {
-                        "virtualPath": "/",
-                        "physicalPath": "site\\wwwroot",
-                        "preloadEnabled": true
-                    }
-                ],
                 "loadBalancing": "LeastRequests",
-                "vnetName": "[variables('vnet_name')]",
-                "vnetRouteAllEnabled": true
+                "vnetName": "[variables('vnetName')]",
+                "vnetRouteAllEnabled": true,
+                "appSettings": [
+                    {
+                    "name": "DATASOURCE_URL",
+                    "value": "[format('jdbc:mysql://{0}.mysql.database.azure.com:3306/{1}?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=true&enabledTLSProtocols=TLSv1.2',variables('dbServerName'),variables('projectDatabaseName'))]"
+                    },
+                                        {
+                    "name": "DATASOURCE_USERNAME",
+                    "value": "[format('{0}@{1}',parameters('databaseUsername'),variables('dbServerName'))]"
+                    },
+                                        {
+                    "name": "ESCHOOL_APP_HOST",
+                    "value": "[format('https://{0}.azurewebsites.net',variables('webAppName'))]"
+                    },
+                                        {
+                    "name": "testLol",
+                    "value": "Wow it works"
+                    },
+                                        {
+                    "name": "testLol",
+                    "value": "Wow it works"
+                    },
+                ]
             }
         },
         {
             "type": "Microsoft.DBforMySQL/servers/virtualNetworkRules",
             "apiVersion": "2017-12-01",
-            "name": "[concat(variables('dbServer_name'), '/webappAcceess')]",
+            "name": "[concat(variables('dbServerName'), '/webappAcceess')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DBforMySQL/servers', variables('dbServer_name'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet_name'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers', variables('dbServerName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
             ],
             "properties": {
-                "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnet_name'), 'snet-webapp')]",
+                "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('snetName'))]",
                 "ignoreMissingVnetServiceEndpoint": false
             }
         },
         {
             "type": "Microsoft.Web/sites",
             "apiVersion": "2021-02-01",
-            "name": "[variables('webapp_name')]",
+            "name": "[variables('webAppName')]",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/serverfarms', variables('plan_name'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet_name'))]"
+                "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
             ],
             "kind": "app,linux",
             "properties": {
                 "enabled": true,
-                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('plan_name'))]",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]",
                 "reserved": true,
                 "siteConfig": {
                     "numberOfWorkers": 1,
                     "linuxFxVersion": "JAVA|8-jre8",
-                    "acrUseManagedIdentityCreds": false,
-                    "alwaysOn": true,
-                    "http20Enabled": false,
-                    "functionAppScaleLimit": 0,
-                    "minimumElasticInstanceCount": 1
+                    "alwaysOn": true
                 },
-                "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnet_name'), 'snet-webapp')]"
+                "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('snetName'))]"
+            }
+        },
+        {
+            "type": "microsoft.insights/autoscalesettings",
+            "apiVersion": "2021-05-01-preview",
+            "name": "[variables('autoscalesettingsName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', variables('webAppName'))]",
+                "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]"
+            ],
+            "properties": {
+                "profiles": [
+                    {
+                        "name": "Autoscale properties",
+                        "capacity": {
+                            "minimum": "1",
+                            "maximum": "2",
+                            "default": "1"
+                        },
+                        "rules": [
+                            {
+                                "metricTrigger": {
+                                    "metricName": "Requests",
+                                    "metricNamespace": "microsoft.web/sites",
+                                    "metricResourceUri": "[resourceId('Microsoft.Web/sites',  variables('webAppName'))]",
+                                    "timeGrain": "PT1M",
+                                    "statistic": "Average",
+                                    "timeWindow": "PT5M",
+                                    "timeAggregation": "Total",
+                                    "operator": "GreaterThan",
+                                    "threshold": "[variables('increaseThreshold')]"
+                                },
+                                "scaleAction": {
+                                    "direction": "Increase",
+                                    "type": "ChangeCount",
+                                    "value": "1",
+                                    "cooldown": "PT5M"
+                                }
+                            },
+                            {
+                                "metricTrigger": {
+                                    "metricName": "Requests",
+                                    "metricNamespace": "microsoft.web/sites",
+                                    "metricResourceUri": "[resourceId('Microsoft.Web/sites', variables('webAppName'))]",
+                                    "timeGrain": "PT1M",
+                                    "statistic": "Average",
+                                    "timeWindow": "PT5M",
+                                    "timeAggregation": "Total",
+                                    "operator": "LessThan",
+                                    "threshold": "[variables('decreaseThreshold')]"
+                                },
+                                "scaleAction": {
+                                    "direction": "Decrease",
+                                    "type": "ChangeCount",
+                                    "value": "1",
+                                    "cooldown": "PT5M"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "enabled": true,
+                "name": "[variables('autoscalesettingsName')]",
+                "targetResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]",
+                "notifications": []
             }
         },
         {
             "type": "Microsoft.Web/sites/virtualNetworkConnections",
             "apiVersion": "2021-02-01",
-            "name": "[concat(variables('webapp_name'), '/',variables('vnet_name'))]",
+            "name": "[concat(variables('webAppName'), '/',variables('vnetName'))]",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', variables('webapp_name'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet_name'))]"
+                "[resourceId('Microsoft.Web/sites', variables('webAppName'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
             ],
             "properties": {
-                "vnetResourceId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnet_name'), 'snet-webapp')]",
+                "vnetResourceId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('snetName'))]",
                 "isSwift": true
             }
+        },
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2021-02-01",
+            "name": "[variables('alertAppPlanName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Y1",
+                "tier": "Dynamic",
+                "size": "Y1",
+                "family": "Y",
+                "capacity": 0
+            },
+            "kind": "functionapp",
+            "properties": {
+                "perSiteScaling": false,
+                "elasticScaleEnabled": false,
+                "maximumElasticWorkerCount": 1,
+                "isSpot": false,
+                "reserved": false,
+                "isXenon": false,
+                "hyperV": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0,
+                "zoneRedundant": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2021-02-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('alertAppPlanName'))]"
+            ],
+            "name": "[variables('alertAppName')]",
+            "location": "[parameters('location')]",
+            "kind": "functionapp",
+            "properties": {
+                "enabled": true,
+                "serverFarmId": "[variables('alertAppPlanName')]"
+            }
+        },
+        
+         {
+            "type": "Microsoft.Web/sites/functions",
+            "apiVersion": "2021-02-01",
+            "name": "[variables('alertFunctionName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', variables('alertAppName'))]",
+                "[resourceId('Microsoft.Web/serverfarms', variables('alertAppPlanName'))]"
+            ],
+            "properties": {
+                "language": "CSharp",
+                "appSettings": [
+                {
+                    "name": "MyFunctionHostKey",
+                    "value": "[parameters('functionHostKey')]"
+                }],
+
+                "config": {
+                    "bindings": [
+            {
+              "name": "req",
+              "type": "httpTrigger",
+              "direction": "in",
+              "authLevel": "function",
+              "methods": [
+                "get"
+              ]
+            },
+            {
+              "name": "$return",
+              "type": "http",
+              "direction": "out"
+            }
+          ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.insights/actionGroups",
+            "apiVersion": "2021-09-01",
+            "name": "[variables('actionGroupsName')]",
+            "location": "Global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', variables('alertAppName'))]"
+            ],
+            "properties": {
+                "groupShortName": "[variables('actionGroupsName')]",
+                "enabled": true,
+                "azureFunctionReceivers": [
+                    {
+                        "name": "CpuAlert",
+                        "functionAppResourceId": "[resourceId('Microsoft.Web/sites', variables('alertAppName'))]",
+                        //"httpTriggerUrl": "[concat('https://',variables(),'azurewebsite')]"
+                        //"httpTriggerUrl": "https://alertmitok.azurewebsites.net/api/httptrigger1?code=Bzt04ffSHLBKf4PsUSQezAMtJj6tXffGMZ0ghVvmqAG2HrsKu2FJ1w==",
+                        "httpTriggerUrl": "[concat('https://',variables('alertAppName'),'.azurewebsites.net/api/',variables('alertFunctionName'),'?code=',parameters('functionHostKey'))]",
+                        "functionName": "[variables('alertFunctionName')]",
+                        "useCommonAlertSchema": false
+                    }
+                ],
+                "armRoleReceivers": []
+            }
+        },
+        {
+            "type": "microsoft.insights/metricAlerts",
+            "apiVersion": "2018-03-01",
+            "name": "[variables('metricAlertsName')]",
+            "location": "global",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]",
+                "[resourceId('microsoft.insights/actionGroups', variables('actionGroupsName'))]"
+            ],
+            "properties": {
+                "description": "A",
+                "severity": 0,
+                "enabled": true,
+                "scopes": [
+                    "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]"
+                ],
+                "evaluationFrequency": "PT1M",
+                "windowSize": "PT1M",
+                "criteria": {
+                    "allOf": [
+                        {
+                            "threshold": "[parameters('cpuThreshold')]",
+                            "name": "Metric1",
+                            "metricNamespace": "Microsoft.Web/serverFarms",
+                            "metricName": "CpuPercentage",
+                            "operator": "GreaterThan",
+                            "timeAggregation": "Average",
+                            "criterionType": "StaticThresholdCriterion"
+                        }
+                    ],
+                    "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
+                },
+                "autoMitigate": true,
+                "targetResourceType": "Microsoft.Web/serverFarms",
+                "actions": [
+                    {
+                        "actionGroupId": "[resourceId('microsoft.insights/actionGroups', variables('actionGroupsName'))]",
+                        "webHookProperties": {}
+                    }
+                ]
+            }
         }
+
     ],
     "outputs": {
         "webappName": {
             "type": "string",
-            "value": "[variables('webapp_name')]"
+            "value": "[variables('webAppName')]"
         },
         "serverName": {
             "type": "string",
-            "value":"[variables('dbServer_name')]"
+            "value":"[variables('dbServerName')]"
         },
         "dbUsername": {
             "type": "string",
