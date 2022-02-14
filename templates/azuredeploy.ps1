@@ -1,3 +1,5 @@
+Write-Host "asdasd----" $ResourceGroupName $Location $prefix
+
 $TemplateFile="templates\azuredeploy.json"
 $TemplateParameterFile="templates\azuredeploy.parameters.json"
 
