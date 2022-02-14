@@ -1,7 +1,7 @@
 param($Location, $ResourceGroupName, $DatabasePassword, $TemplateFile, $TemplateParameterFile, $prefix, $slackURL)
 $TemplateFile="templates\azuredeploy.json"
 $TemplateParameterFile="templates\azuredeploy.parameters.json"
-
+$alertScript = Get-Content -Path "templates\alertScript.csx" -Raw
 
 if (!$prefix) {
     Write-Host 'Using default name prefix'
@@ -31,7 +31,7 @@ if ($notValid) {
     Write-Host "Template is not valid according to the validation procedure\n Use Get-AzLog -CorrelationId <correlationId> for more info"
     exit
 }
-$alertScript = Get-Content -Path ".\alertScript.csx" -Raw
+
 $alertScript=$alertScript.replace('\\','\\')
 $alertScript=$alertScript.replace('"','\"')
 $alertScript=$alertScript.replace("`r`n",'\r\n')
