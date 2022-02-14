@@ -107,7 +107,7 @@
         "storageAccountName": "[toLower(format('st{0}{1}',parameters('prefix'),'func'))]",
         "storageSku": "Standard_LRS",
         "appInsightsName": "AppInsights",
-        "alertAppID": "[format('{0}/host/default', resourceId('Microsoft.Web/sites', variables('alertAppName')))]"
+        "alertAppHostKey": "[format('{0}/host/default', resourceId('Microsoft.Web/sites', variables('alertAppName')))]"
     },
     "resources": [
         {
@@ -484,7 +484,7 @@
                     {
                         "name": "CpuAlert",
                         "functionAppResourceId": "[resourceId('Microsoft.Web/sites', variables('alertAppName'))]",
-                        "httpTriggerUrl": "[uri('https://',format('{0}.azurewebsites.net/api/SlackTrigger?code={1}',variables('alertAppName'),listKeys(variables('alertAppID'), '2020-12-01').functionKeys.default))]",
+                        "httpTriggerUrl": "[uri('https://',format('{0}.azurewebsites.net/api/SlackTrigger?code={1}',variables('alertAppName'),listKeys(variables('alertAppHostKey'), '2020-12-01').functionKeys.default))]",
                         "functionName": "[variables('alertFunctionName')]",
                         "useCommonAlertSchema": false
                     }
