@@ -525,8 +525,7 @@
                 "targetResourceType": "Microsoft.Web/serverFarms",
                 "actions": [
                     {
-                        "actionGroupId": "[resourceId('Microsoft.insights/actionGroups', variables('actionGroupsName'))]",
-                        "webHookProperties": {}
+                        "actionGroupId": "[resourceId('Microsoft.insights/actionGroups', variables('actionGroupsName'))]"
                     }
                 ]
             }
