@@ -1,4 +1,4 @@
-$TemplateFile=.\azuredeploy.ps1
+$TemplateFile=.\azuredeploy.json
 $TemplateParameterFile=.\azuredeploy.parameters.json
 if (!$prefix) {
     Write-Host 'Using default name prefix'
