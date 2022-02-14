@@ -7,17 +7,17 @@ if (!$prefix) {
     Write-Host 'Using default name prefix'
     $prefix = 'armgen'
 }
-
+Write-Host 1
 if (!$ResourceGroupName.StartsWith("rg")) {
     $ResourceGroupName = "rg-"+$ResourceGroupName+"-"+$Location
 }
-
+Write-Host 2
 Get-AzResourceGroup -Name $ResourceGroupName -ErrorVariable $notPresent -ErrorAction silentlycontinue
 if (!$notPresent)
 {
     New-AzResourceGroup -Name $ResourceGroupName -Location $Location
 }
-
+Write-Host 3
 $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
 $deploymentName="WebAppDeploy"+"${today}"
 
@@ -31,13 +31,13 @@ if ($notValid) {
     Write-Host "Template is not valid according to the validation procedure\n Use Get-AzLog -CorrelationId <correlationId> for more info"
     exit
 }
-
+Write-Host 4
 $alertScript = Get-Content -Path "templates\alertScript.csx" -Raw
 $alertScript=$alertScript.replace('\\','\\')
 $alertScript=$alertScript.replace('"','\"')
 $alertScript=$alertScript.replace("`r`n",'\r\n')
-
-New-AzResourceGroupDeployment -Force`
+Write-Host 5
+New-AzResourceGroupDeployment -Force `
     -Name $deploymentName -ResourceGroupName $ResourceGroupName -Location $Location `
     -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile `
     -prefix $prefix  -databasePassword $databasePassword `
