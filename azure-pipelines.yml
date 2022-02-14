@@ -43,10 +43,11 @@ stages:
             azureSubscription: 'Azure2'
             ScriptType: 'FilePath'
             ScriptPath: 'templates/azuredeploy.ps1'
-            ScriptArguments: -Location ${env:location} -ResourceGroupName ${env:groupName} -prefix ${env:prefix} -DatabasePassword $env:MAPPED_ENV_DB_PASS -TemplateFile templates\azuredeploy.json -TemplateParameterFile templates\azuredeploy.parameters.json
+            ScriptArguments: -Location ${env:location} -ResourceGroupName ${env:groupName} -prefix ${env:prefix} -DatabasePassword $env:MAPPED_ENV_DB_PASS -slackURL $env:MAPPED_SLACK_URL
             azurePowerShellVersion: 'LatestVersion'
           env:
             MAPPED_ENV_DB_PASS: $(DatabasePassword)
+            MAPPED_SLACK_URL: $(slackURL)
 
   - stage: Create_variables_group
     variables:

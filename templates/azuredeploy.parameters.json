@@ -10,6 +10,12 @@
         },
         "databasePassword": {
             "value": ""
+        },
+        "slackURL": {
+            "value": ""
+        },
+        "alertScript": {
+            "value": ""
         }
     }
 }
