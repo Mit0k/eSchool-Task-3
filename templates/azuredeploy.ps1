@@ -1,6 +1,3 @@
-pwd
-$TemplateFile=azuredeploy.json
-$TemplateParameterFile=azuredeploy.parameters.json
 if (!$prefix) {
     Write-Host 'Using default name prefix'
     $prefix = 'armgen'
