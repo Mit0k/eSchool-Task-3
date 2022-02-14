@@ -57,6 +57,14 @@
       "metadata": {
         "description": "description"
       }
+    },
+    "vnetAddressPrefixes": {
+      "type": "string",
+      "defaultValue": "10.2.0.0/16"
+    },
+    "snetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.2.1.0/24"
     }
   },
   "variables": {
@@ -99,9 +107,7 @@
     "alertFunctionName": "SlackTrigger",
     "metricAlertsName": "[helpers.uniqueName('metric_alert',parameters('prefix'),parameters('location'))]",
     "actionGroupsName": "[concat('ag-',parameters('location'))]",
-    "vnetAddressPrefixes": "10.2.0.0/16",
     "snetName": "[concat('snet-',parameters('prefix'))]",
-    "snetAddressPrefix": "10.2.1.0/24",
     "increaseThreshold": 50,
     "decreaseThreshold": 40,
     "storageAccountName": "[toLower(format('st{0}{1}',parameters('prefix'),'func'))]",
@@ -128,13 +134,13 @@
       "location": "[parameters('location')]",
       "properties": {
         "addressSpace": {
-          "addressPrefixes": ["[variables('vnetAddressPrefixes')]"]
+          "addressPrefixes": ["[parameters('vnetAddressPrefixes')]"]
         },
         "subnets": [
           {
             "name": "[variables('snetName')]",
             "properties": {
-              "addressPrefix": "[variables('snetAddressPrefix')]",
+              "addressPrefix": "[parameters('snetAddressPrefix')]",
               "serviceEndpoints": [
                 {
                   "service": "Microsoft.Sql",
@@ -189,8 +195,8 @@
         "numberOfWorkers": 1,
         "linuxFxVersion": "JAVA|8-jre8",
         "alwaysOn": true,
-        "managedPipelineMode": "Integrated",
         "appCommandLine": "java -jar /home/site/wwwroot/eschool.jar",
+        "managedPipelineMode": "Integrated",
         "loadBalancing": "LeastRequests",
         "vnetName": "[variables('vnetName')]",
         "vnetRouteAllEnabled": true,
