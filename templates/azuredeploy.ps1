@@ -1,6 +1,18 @@
-param($Location, $ResourceGroupName, $DatabasePassword, $TemplateFile, $TemplateParameterFile, $prefix, $slackURL)
-$TemplateFile="templates\azuredeploy.json"
-$TemplateParameterFile="templates\azuredeploy.parameters.json"
+###-----------------------------------------------------------
+$Location='eastus'
+$ResourceGroupName='jedi'
+$DatabasePassword='Tester00__'
+$TemplateFile='C:\Users\mitok\source\repos\ArmWebAppSDB\eschool-webappSDB\templates\azuredeploy.json'
+$TemplateParameterFile='C:\Users\mitok\source\repos\ArmWebAppSDB\eschool-webappSDB\templates\azuredeploy.parameters.json'
+$prefix='jedi'
+$slackURL = "https://hooks.slack.com/services/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"
+$TemplateFile=".\azuredeploy.json"
+$TemplateParameterFile=".\azuredeploy.parameters.json"
+###
+###-------------------------------------------------------------
+#param($Location, $ResourceGroupName, $DatabasePassword, $TemplateFile, $TemplateParameterFile, $prefix, $slackURL)
+#$TemplateFile="templates\azuredeploy.json"
+#$TemplateParameterFile="templates\azuredeploy.parameters.json"
 $alertScript = Get-Content -Path "templates\alertScript.csx" -Raw
 
 if (!$prefix) {

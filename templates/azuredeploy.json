@@ -110,7 +110,7 @@
     "snetName": "[concat('snet-',parameters('prefix'))]",
     "increaseThreshold": 50,
     "decreaseThreshold": 40,
-    "storageAccountName": "[toLower(format('st{0}{1}',parameters('prefix'),'func'))]",
+    "storageAccountName": "[toLower(format('st{0}{1}',parameters('prefix'),'mitokfunc'))]",
     "storageSku": "Standard_LRS",
     "appInsightsName": "AppInsights",
     "alertAppHostKey": "[format('{0}/host/default', resourceId('Microsoft.Web/sites', variables('alertAppName')))]"
