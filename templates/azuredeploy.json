@@ -190,6 +190,7 @@
         "linuxFxVersion": "JAVA|8-jre8",
         "alwaysOn": true,
         "managedPipelineMode": "Integrated",
+        "appCommandLine": "java -jar /home/site/wwwroot/eschool.jar",
         "loadBalancing": "LeastRequests",
         "vnetName": "[variables('vnetName')]",
         "vnetRouteAllEnabled": true,
