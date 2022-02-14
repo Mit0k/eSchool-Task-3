@@ -2,17 +2,17 @@ if (!$prefix) {
     Write-Host 'Using default name prefix'
     $prefix = 'armgen'
 }
-
+Write-Host 1
 if (!$ResourceGroupName.StartsWith("rg")) {
     $ResourceGroupName = "rg-"+$ResourceGroupName+"-"+$Location
 }
-
+Write-Host 2
 Get-AzResourceGroup -Name $ResourceGroupName -ErrorVariable $notPresent
 if (!$notPresent)
 {
     New-AzResourceGroup -Name $ResourceGroupName -Location $Location
 }
-
+Write-Host 3
 
 $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
 $deploymentName="WebAppDeploy"+"${today}"
