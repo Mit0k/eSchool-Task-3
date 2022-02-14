@@ -1,8 +1,7 @@
 param($Location, $ResourceGroupName, $DatabasePassword, $TemplateFile, $TemplateParameterFile, $prefix, $slackURL)
+$TemplateFile="templates\azuredeploy.json"
+$TemplateParameterFile="templates\azuredeploy.parameters.json"
 
-
-$TemplateFile=".\azuredeploy.json"
-$TemplateParameterFile=".\azuredeploy.parameters.json"
 
 if (!$prefix) {
     Write-Host 'Using default name prefix'
