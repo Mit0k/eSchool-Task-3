@@ -11,8 +11,11 @@
         "databasePassword": {
             "value": ""
         },
-        "functionHostKey": {
-            "value": "" 
+        "slackURL": {
+            "value": ""
+        },
+        "alertScript": {
+            "value": ""
         }
     }
 }

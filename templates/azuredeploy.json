@@ -2,18 +2,32 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "functions": [
-    {
-        "namespace": "helpers",
+        {
+            "namespace": "helpers",
             "members": {
                 "uniqueName": {
                     "parameters": [
-                        {"name": "resourceName", "type": "string"},
-                        {"name": "prefix" , "type": "string"},
-                        {"name": "location", "type" : "string"}],
-                "output": {
-                    "type": "string",
-                    "value": "[toLower(concat(parameters('resourceName'),'-',parameters('prefix'),'-',parameters('location')))]"}}}
-    }],
+                        {
+                            "name": "resourceName",
+                            "type": "string"
+                        },
+                        {
+                            "name": "prefix",
+                            "type": "string"
+                        },
+                        {
+                            "name": "location",
+                            "type": "string"
+                        }
+                    ],
+                    "output": {
+                        "type": "string",
+                        "value": "[toLower(concat(parameters('resourceName'),'-',parameters('prefix'),'-',parameters('location')))]"
+                    }
+                }
+            }
+        }
+    ],
     "parameters": {
         "prefix": {
             "type": "string"
@@ -21,7 +35,7 @@
         "location": {
             "type": "string"
         },
-        "databaseUsername":{
+        "databaseUsername": {
             "type": "string",
             "defaultValue": "mysqladmin"
         },
@@ -35,58 +49,72 @@
             },
             "defaultValue": 75
         },
-        "functionHostKey": {
+        "slackURL": {
             "type": "securestring"
+        },
+        "alertScript": {
+            "type": "string",
+            "metadata": {
+                "description": "description"
+            }
         }
     },
     "variables": {
-        "planName":        "[helpers.uniqueName('plan',parameters('prefix'),parameters('location'))]",
+        "planName": "[helpers.uniqueName('plan',parameters('prefix'),parameters('location'))]",
         "planSKU": {
-                            "name": "S1",
-                            "tier": "Standard",
-                            "size": "S1",
-                            "family": "S",
-                            "capacity": 1},
-        "webAppName":      "[helpers.uniqueName('app',parameters('prefix'),parameters('location'))]",
-        "projectDatabaseName" : "eschool",
-        "dbServerName":    "[helpers.uniqueName('db',parameters('prefix'),parameters('location'))]",
+            "name": "S1",
+            "tier": "Standard",
+            "size": "S1",
+            "family": "S",
+            "capacity": 1
+        },
+        "webAppName": "[helpers.uniqueName('app',parameters('prefix'),parameters('location'))]",
+        "projectDatabaseName": "eschool",
+        "dbServerName": "[helpers.uniqueName('db',parameters('prefix'),parameters('location'))]",
         "dbSKU": {
-                            "name": "GP_Gen5_4",
-                            "tier": "GeneralPurpose",
-                            "family": "Gen5",
-                            "capacity": 4},
+            "name": "GP_Gen5_4",
+            "tier": "GeneralPurpose",
+            "family": "Gen5",
+            "capacity": 4
+        },
         "dbProperties": {
-                            "administratorLogin": "[parameters('databaseUsername')]",
-                            "administratorLoginPassword": "[parameters('databasePassword')]",
-                            "storageProfile": {
-                                "storageMB": 102400,
-                                "backupRetentionDays": 7,
-                                "geoRedundantBackup": "Disabled",
-                                "storageAutogrow": "Enabled"
-                            },
-                            "version": "5.7",
-                            "sslEnforcement": "Enabled",
-                            "minimalTlsVersion": "TLS1_2",
-                            "infrastructureEncryption": "Disabled",
-                            "publicNetworkAccess": "Enabled"},
-        "vnetName":"[helpers.uniqueName('vnet',parameters('prefix'),parameters('location'))]",
+            "administratorLogin": "[parameters('databaseUsername')]",
+            "administratorLoginPassword": "[parameters('databasePassword')]",
+            "storageProfile": {
+                "storageMB": 102400,
+                "backupRetentionDays": 7,
+                "geoRedundantBackup": "Disabled",
+                "storageAutogrow": "Enabled"
+            },
+            "version": "5.7",
+            "sslEnforcement": "Enabled",
+            "minimalTlsVersion": "TLS1_2",
+            "infrastructureEncryption": "Disabled",
+            "publicNetworkAccess": "Enabled"
+        },
+        "vnetName": "[helpers.uniqueName('vnet',parameters('prefix'),parameters('location'))]",
         "autoscalesettingsName": "autoscalesettings_webapp",
         "alertAppName": "[helpers.uniqueName('func',parameters('prefix'),parameters('location'))]",
         "alertAppPlanName": "[helpers.uniqueName('plan-func',parameters('prefix'),parameters('location'))]",
-        "alertFunctionName": "[concat(variables('alertAppName'), '/SlackTrigger')]",
+        "alertFunctionName": "SlackTrigger",
         "metricAlertsName": "[helpers.uniqueName('metric_alert',parameters('prefix'),parameters('location'))]",
         "actionGroupsName": "[concat('ag-',parameters('location'))]",
         "vnetAddressPrefixes": "10.2.0.0/16",
         "snetName": "[concat('snet-',parameters('prefix'))]",
         "snetAddressPrefix": "10.2.1.0/24",
         "increaseThreshold": 50,
-        "decreaseThreshold": 40
+        "decreaseThreshold": 40,
+        "storageAccountName": "[toLower(format('st{0}{1}',parameters('prefix'),'func'))]",
+        "storageSku": "Standard_LRS",
+        "appInsightsName": "AppInsights",
+        "alertAppID": "[format('{0}/host/default', resourceId('Microsoft.Web/sites', variables('alertAppName')))]"
+
 
     },
     "resources": [
         {
             "type": "Microsoft.DBforMySQL/servers",
-            "dependsOn":[ "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]"],
+            "dependsOn": [ "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]" ],
             "apiVersion": "2017-12-01",
             "name": "[variables('dbServerName')]",
             "location": "[parameters('location')]",
@@ -172,25 +200,21 @@
                 "vnetRouteAllEnabled": true,
                 "appSettings": [
                     {
-                    "name": "DATASOURCE_URL",
-                    "value": "[format('jdbc:mysql://{0}.mysql.database.azure.com:3306/{1}?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=true&enabledTLSProtocols=TLSv1.2',variables('dbServerName'),variables('projectDatabaseName'))]"
+                        "name": "DATASOURCE_URL",
+                        "value": "[format('jdbc:mysql://{0}.mysql.database.azure.com:3306/{1}?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=true&enabledTLSProtocols=TLSv1.2',variables('dbServerName'),variables('projectDatabaseName'))]"
                     },
-                                        {
-                    "name": "DATASOURCE_USERNAME",
-                    "value": "[format('{0}@{1}',parameters('databaseUsername'),variables('dbServerName'))]"
+                    {
+                        "name": "DATASOURCE_USERNAME",
+                        "value": "[format('{0}@{1}',parameters('databaseUsername'),variables('dbServerName'))]"
                     },
-                                        {
-                    "name": "ESCHOOL_APP_HOST",
-                    "value": "[format('https://{0}.azurewebsites.net',variables('webAppName'))]"
+                    {
+                        "name": "DATASOURCE_PASSWORD",
+                        "value": "[parameters('databasePassword')]"
                     },
-                                        {
-                    "name": "testLol",
-                    "value": "Wow it works"
-                    },
-                                        {
-                    "name": "testLol",
-                    "value": "Wow it works"
-                    },
+                    {
+                        "name": "ESCHOOL_APP_HOST",
+                        "value": "[format('{0}.azurewebsites.net',variables('webAppName'))]"
+                    }
                 ]
             }
         },
@@ -230,7 +254,7 @@
             }
         },
         {
-            "type": "microsoft.insights/autoscalesettings",
+            "type": "Microsoft.insights/autoscalesettings",
             "apiVersion": "2021-05-01-preview",
             "name": "[variables('autoscalesettingsName')]",
             "location": "[parameters('location')]",
@@ -251,7 +275,7 @@
                             {
                                 "metricTrigger": {
                                     "metricName": "Requests",
-                                    "metricNamespace": "microsoft.web/sites",
+                                    "metricNamespace": "Microsoft.web/sites",
                                     "metricResourceUri": "[resourceId('Microsoft.Web/sites',  variables('webAppName'))]",
                                     "timeGrain": "PT1M",
                                     "statistic": "Average",
@@ -270,7 +294,7 @@
                             {
                                 "metricTrigger": {
                                     "metricName": "Requests",
-                                    "metricNamespace": "microsoft.web/sites",
+                                    "metricNamespace": "Microsoft.web/sites",
                                     "metricResourceUri": "[resourceId('Microsoft.Web/sites', variables('webAppName'))]",
                                     "timeGrain": "PT1M",
                                     "statistic": "Average",
@@ -291,8 +315,7 @@
                 ],
                 "enabled": true,
                 "name": "[variables('autoscalesettingsName')]",
-                "targetResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]",
-                "notifications": []
+                "targetResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]"
             }
         },
         {
@@ -310,6 +333,45 @@
             }
         },
         {
+            "type": "Microsoft.Insights/components",
+            "apiVersion": "2020-02-02",
+            "name": "[variables('appInsightsName')]",
+            "location": "[parameters('location')]",
+            "kind": "web",
+            "properties": {
+                "Application_Type": "web",
+                "publicNetworkAccessForIngestion": "Enabled",
+                "publicNetworkAccessForQuery": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-04-01",
+            "name": "[variables('storageAccountName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "[variables('storageSku')]"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "accessTier": "Hot"
+            }
+        },
+        {
             "type": "Microsoft.Web/serverfarms",
             "apiVersion": "2021-02-01",
             "name": "[variables('alertAppPlanName')]",
@@ -321,69 +383,92 @@
                 "family": "Y",
                 "capacity": 0
             },
-            "kind": "functionapp",
-            "properties": {
-                "perSiteScaling": false,
-                "elasticScaleEnabled": false,
-                "maximumElasticWorkerCount": 1,
-                "isSpot": false,
-                "reserved": false,
-                "isXenon": false,
-                "hyperV": false,
-                "targetWorkerCount": 0,
-                "targetWorkerSizeId": 0,
-                "zoneRedundant": false
-            }
+            "kind": "functionapp"
         },
         {
             "type": "Microsoft.Web/sites",
-            "apiVersion": "2021-02-01",
+            "apiVersion": "2020-12-01",
             "dependsOn": [
-                "[resourceId('Microsoft.Web/serverfarms', variables('alertAppPlanName'))]"
+                "[resourceId('Microsoft.Web/serverfarms', variables('alertAppPlanName'))]",
+                "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
             ],
             "name": "[variables('alertAppName')]",
             "location": "[parameters('location')]",
             "kind": "functionapp",
             "properties": {
                 "enabled": true,
-                "serverFarmId": "[variables('alertAppPlanName')]"
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms',variables('alertAppPlanName'))]",
+                "siteConfig": {
+                    "numberOfWorkers": 1,
+                    "httpsOnly": true,
+                    "appSettings": [
+                        {
+                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "value": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName'))).InstrumentationKey]"
+                        },
+                        {
+                            "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                            "value": "[format('InstrumentationKey={0}', reference(resourceId('Microsoft.Insights/components', variables('appInsightsName'))).InstrumentationKey)]"
+                        },
+                        {
+                            "name": "AzureWebJobsStorage",
+                            "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-04-01').keys[0].value)]"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                            "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-04-01').keys[0].value)]"
+                        },
+                        {
+                            "name": "FUNCTIONS_WORKER_RUNTIME",
+                            "value": "dotnet"
+                        },
+                        {
+                            "name": "FUNCTIONS_EXTENSION_VERSION",
+                            "value": "~4"
+                        },
+                        {
+                            "name": "WEBSITE_CONTENTSHARE",
+                            "value": "[toLower(variables('alertAppName'))]"
+                        },
+                        {
+                            "name": "SLACK_URL",
+                            "value": "[parameters('slackURL')]"
+                        }
+                    ]
+
+                }
             }
         },
-        
-         {
+        {
+            //from EXAMPLE
             "type": "Microsoft.Web/sites/functions",
-            "apiVersion": "2021-02-01",
-            "name": "[variables('alertFunctionName')]",
-            "location": "[parameters('location')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Web/sites', variables('alertAppName'))]",
-                "[resourceId('Microsoft.Web/serverfarms', variables('alertAppPlanName'))]"
-            ],
+            "apiVersion": "2020-12-01",
+            "name": "[format('{0}/{1}', variables('alertAppName'), variables('alertFunctionName'))]",
+            "dependsOn": [ "[resourceId('Microsoft.Web/sites', variables('alertAppName'))]" ],
             "properties": {
-                "language": "CSharp",
-                "appSettings": [
-                {
-                    "name": "MyFunctionHostKey",
-                    "value": "[parameters('functionHostKey')]"
-                }],
-
                 "config": {
+                    "disabled": false,
                     "bindings": [
-            {
-              "name": "req",
-              "type": "httpTrigger",
-              "direction": "in",
-              "authLevel": "function",
-              "methods": [
-                "get"
-              ]
-            },
-            {
-              "name": "$return",
-              "type": "http",
-              "direction": "out"
-            }
-          ]
+                        {
+                            "name": "req",
+                            "type": "httpTrigger",
+                            "direction": "in",
+                            "authLevel": "function",
+                            "methods": [
+                                "get",
+                                "post"
+                            ]
+                        },
+                        {
+                            "name": "$return",
+                            "type": "http",
+                            "direction": "out"
+                        }
+                    ]
+                },
+                "files": {
+                    "run.csx": "[parameters('alertScript')]"
                 }
             }
         },
@@ -402,24 +487,22 @@
                     {
                         "name": "CpuAlert",
                         "functionAppResourceId": "[resourceId('Microsoft.Web/sites', variables('alertAppName'))]",
-                        //"httpTriggerUrl": "[concat('https://',variables(),'azurewebsite')]"
-                        //"httpTriggerUrl": "https://alertmitok.azurewebsites.net/api/httptrigger1?code=Bzt04ffSHLBKf4PsUSQezAMtJj6tXffGMZ0ghVvmqAG2HrsKu2FJ1w==",
-                        "httpTriggerUrl": "[concat('https://',variables('alertAppName'),'.azurewebsites.net/api/',variables('alertFunctionName'),'?code=',parameters('functionHostKey'))]",
+                        "httpTriggerUrl": "[uri('https://',format('{0}.azurewebsites.net/api/SlackTrigger?code={1}',variables('alertAppName'),listKeys(variables('alertAppID'), '2020-12-01').functionKeys.default))]",
+                        
                         "functionName": "[variables('alertFunctionName')]",
                         "useCommonAlertSchema": false
                     }
-                ],
-                "armRoleReceivers": []
+                ]
             }
         },
         {
-            "type": "microsoft.insights/metricAlerts",
+            "type": "Microsoft.insights/metricAlerts",
             "apiVersion": "2018-03-01",
             "name": "[variables('metricAlertsName')]",
             "location": "global",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]",
-                "[resourceId('microsoft.insights/actionGroups', variables('actionGroupsName'))]"
+                "[resourceId('Microsoft.insights/actionGroups', variables('actionGroupsName'))]"
             ],
             "properties": {
                 "description": "A",
@@ -448,7 +531,7 @@
                 "targetResourceType": "Microsoft.Web/serverFarms",
                 "actions": [
                     {
-                        "actionGroupId": "[resourceId('microsoft.insights/actionGroups', variables('actionGroupsName'))]",
+                        "actionGroupId": "[resourceId('Microsoft.insights/actionGroups', variables('actionGroupsName'))]",
                         "webHookProperties": {}
                     }
                 ]
@@ -463,7 +546,7 @@
         },
         "serverName": {
             "type": "string",
-            "value":"[variables('dbServerName')]"
+            "value": "[variables('dbServerName')]"
         },
         "dbUsername": {
             "type": "string",
