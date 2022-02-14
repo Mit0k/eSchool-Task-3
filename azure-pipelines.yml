@@ -27,7 +27,7 @@ stages:
             ScriptArguments: -Location ${env:location} -ResourceGroupName ${env:groupName} -prefix ${env:prefix} -DatabasePassword $env:MAPPED_ENV_DB_PASS -slackURL $env:MAPPED_SLACK_URL
             azurePowerShellVersion: 'LatestVersion'
           env:
-            MAPPED_ENV_DB_PASS: $(DatabasePassword)
+            MAPPED_ENV_DB_PASS: $(DatabasePassword),
             MAPPED_SLACK_URL: $(slackURL)
 
   - stage: Create_variables_group
