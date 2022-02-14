@@ -37,10 +37,11 @@ $alertScript=$alertScript.replace('\\','\\')
 $alertScript=$alertScript.replace('"','\"')
 $alertScript=$alertScript.replace("`r`n",'\r\n')
 
-New-AzResourceGroupDeployment -Name $deploymentName -ResourceGroupName $ResourceGroupName -Location $Location `
-     -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile `
-     -prefix $prefix  -databasePassword $databasePassword `
-     -slackURL $slackURL -alertScript $alertScript -Force
+New-AzResourceGroupDeployment -WhatIf --mode Incremental `
+    -Name $deploymentName -ResourceGroupName $ResourceGroupName -Location $Location `
+    -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile `
+    -prefix $prefix  -databasePassword $databasePassword `
+    -slackURL $slackURL -alertScript $alertScript
 
 $webappName=(Get-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -Name $deploymentName).Outputs.webappName.value
 
