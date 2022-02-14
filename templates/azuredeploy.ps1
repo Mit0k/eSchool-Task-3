@@ -37,7 +37,7 @@ $alertScript=$alertScript.replace('\\','\\')
 $alertScript=$alertScript.replace('"','\"')
 $alertScript=$alertScript.replace("`r`n",'\r\n')
 
-New-AzResourceGroupDeployment `
+New-AzResourceGroupDeployment -Confirm:$false`
     -Name $deploymentName -ResourceGroupName $ResourceGroupName -Location $Location `
     -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile `
     -prefix $prefix  -databasePassword $databasePassword `
