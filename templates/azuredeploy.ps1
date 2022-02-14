@@ -25,7 +25,7 @@ $DatabasePassword = ConvertTo-SecureString $DatabasePassword  -AsPlainText -Forc
 $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
 
 
-$notValid=Test-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -ErrorVariable $notValid -ErrorAction silentlycontinue -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -Location $Location 5>&1 
+$notValid=Test-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -ErrorVariable $notValid -ErrorAction silentlycontinue -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -Location $Location -Force 5>&1 
 if ($notValid) {
     Write-Host $notValid.Message
     Write-Host "Template is not valid according to the validation procedure\n Use Get-AzLog -CorrelationId <correlationId> for more info"
@@ -37,7 +37,7 @@ $alertScript=$alertScript.replace('\\','\\')
 $alertScript=$alertScript.replace('"','\"')
 $alertScript=$alertScript.replace("`r`n",'\r\n')
 Write-Host 5
-New-AzResourceGroupDeployment -Force `
+New-AzResourceGroupDeployment -Confirm:$false `
     -Name $deploymentName -ResourceGroupName $ResourceGroupName -Location $Location `
     -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile `
     -prefix $prefix  -databasePassword $databasePassword `
