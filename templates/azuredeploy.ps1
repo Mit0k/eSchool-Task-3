@@ -1,19 +1,18 @@
 param($Location, $ResourceGroupName, $DatabasePassword, $TemplateFile, $TemplateParameterFile, $prefix, $slackURL)
-#$TemplateFile="templates\azuredeploy.json"
-#$TemplateParameterFile="templates\azuredeploy.parameters.json"
+
 
 $TemplateFile=".\azuredeploy.json"
 $TemplateParameterFile=".\azuredeploy.parameters.json"
 
 if (!$prefix) {
     Write-Host 'Using default name prefix'
-    $prefix = 'armgen'
+    $prefix = 'armeschool'
 }
 
 if (!$ResourceGroupName.StartsWith("rg")) {
     $ResourceGroupName = "rg-"+$ResourceGroupName+"-"+$Location
 }
-
+Write-Host "##[debug]Getting resource group"
 Get-AzResourceGroup -Name $ResourceGroupName -ErrorVariable notPresent -ErrorAction silentlycontinue
 Write-Host $notPresent
 if ($notPresent)
@@ -26,20 +25,18 @@ $deploymentName="WebAppDeploy"+"${today}"
 
 $DatabasePassword = ConvertTo-SecureString $DatabasePassword  -AsPlainText -Force
 $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
-
-Write-Host 3
+Write-Host "##[debug]Validating template"
 $notValid=Test-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -ErrorVariable $notValid -ErrorAction SilentlyContinue -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -Location $Location 5>&1 
 if ($notValid) {
     Write-Host $notValid.Message
     Write-Host "Template is not valid according to the validation procedure\n Use Get-AzLog -CorrelationId <correlationId> for more info"
     exit
 }
-Write-Host 4
 $alertScript = Get-Content -Path ".\alertScript.csx" -Raw
 $alertScript=$alertScript.replace('\\','\\')
 $alertScript=$alertScript.replace('"','\"')
 $alertScript=$alertScript.replace("`r`n",'\r\n')
-
+Write-Host "##[debug]Deploying template"
 New-AzResourceGroupDeployment `
     -Name $deploymentName -ResourceGroupName $ResourceGroupName -Location $Location `
     -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile `
