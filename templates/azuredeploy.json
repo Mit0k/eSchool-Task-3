@@ -191,7 +191,6 @@
                 "numberOfWorkers": 1,
                 "linuxFxVersion": "JAVA|8-jre8",
                 "alwaysOn": true,
-                //"appCommandLine": "java -jar /home/site/wwwroot/eschool.jar",
                 "managedPipelineMode": "Integrated",
                 "loadBalancing": "LeastRequests",
                 "vnetName": "[variables('vnetName')]",
@@ -438,7 +437,6 @@
             }
         },
         {
-            //from EXAMPLE
             "type": "Microsoft.Web/sites/functions",
             "apiVersion": "2020-12-01",
             "name": "[format('{0}/{1}', variables('alertAppName'), variables('alertFunctionName'))]",
