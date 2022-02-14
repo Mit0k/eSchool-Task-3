@@ -1,7 +1,7 @@
 variables:
   location: "eastus"
-  groupName: "pipeline"
-  prefix: "pipe"
+  groupName: "demo"
+  prefix: "demo"
 
   PROJECT: $(System.TeamProject)
   ORG: $(System.TeamFoundationCollectionUri)
