@@ -14,25 +14,6 @@ pool:
   vmImage: 'windows-latest'
   
 stages:
-  - stage: ARM_Testing
-    jobs:
-    - job: ARMTTK
-      steps:
-        - task: RunARMTTKTests@1
-          displayName: Run ARM TTK tests 
-          name: TTKtests
-          inputs:
-            templatelocation: '$(System.DefaultWorkingDirectory)\templates'
-            resultLocation: '$(System.DefaultWorkingDirectory)\results'
-
-        - task: PublishTestResults@2
-          displayName: Publish test restults
-          name: PublishResults
-          inputs:
-            testResultsFormat: 'NUnit'
-            testResultsFiles: '$(System.DefaultWorkingDirectory)\results\*-armttk.xml'
-          condition: always()
-
   - stage: Deploying_infrastructure
     jobs:
     - job: ARM_Template_deploying
