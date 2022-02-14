@@ -1,14 +1,3 @@
-###-----------------------------------------------------------
-##!!!##$Location='eastus'
-##!!!##$ResourceGroupName='jedi'
-##!!!##$DatabasePassword='Tester00__'
-##!!!##$TemplateFile='C:\Users\mitok\source\repos\ArmWebAppSDB\eschool-webappSDB\templates\azuredeploy.json'
-##!!!##$TemplateParameterFile='C:\Users\mitok\source\repos\ArmWebAppSDB\eschool-webappSDB\templates\azuredeploy.parameters.json'
-##!!!##$prefix='jedi'
-##!!!##$slackURL = "https://hooks.slack.com/services/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"
-###
-###-------------------------------------------------------------
-#param($Location, $ResourceGroupName, $DatabasePassword, $TemplateFile, $TemplateParameterFile, $prefix, $KvResourceGroupName)
 $TemplateFile=.\azuredeploy.ps1
 $TemplateParameterFile=.\azuredeploy.parameters.json
 if (!$prefix) {
