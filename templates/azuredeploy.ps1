@@ -32,9 +32,7 @@ if ($notValid) {
     exit
 }
 
-$alertScript=$alertScript.replace('\\','\\')
-$alertScript=$alertScript.replace('"','\"')
-$alertScript=$alertScript.replace("`r`n",'\r\n')
+
 Write-Host "##[debug]Deploying template"
 New-AzResourceGroupDeployment `
     -Name $deploymentName -ResourceGroupName $ResourceGroupName -Location $Location `
