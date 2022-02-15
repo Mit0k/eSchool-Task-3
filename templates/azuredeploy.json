@@ -38,7 +38,7 @@
           ],
           "output": {
             "type": "string",
-            "value": "[concat(split(split(parameters('addressPrefix'),'/')[0],'.')[1],split(split(parameters('addressPrefix'),'/')[0],'.')[2],split(split(parameters('addressPrefix'),'/')[0],'.')[3],parameters('ip'))]"
+            "value": "[format('{0}.{1}.{2}.{3}',split(parameters('addressPrefix'),'.')[0],split(parameters('addressPrefix'),'.')[1],split(parameters('addressPrefix'),'.')[2],parameters('ip'))]"
           }
         }
       }
@@ -88,6 +88,7 @@
     }
   },
   "variables": {
+    "vnetLink": "[concat(variables('privateDnsName'), '/',uniqueString(parameters('prefix')))]",
     "planName": "[helpers.uniqueName('plan',parameters('prefix'),parameters('location'))]",
     "planSKU": {
       "name": "S1",
@@ -140,13 +141,16 @@
     {
       "type": "Microsoft.Network/privateDnsZones",
       "apiVersion": "2020-06-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ],
       "name": "[variables('privateDnsName')]",
       "location": "global"
     },
     {
       "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
       "apiVersion": "2020-06-01",
-      "name": "[concat(variables('privateDnsName'), '/',uniqueString(parameters('prefix')))]",
+      "name": "[variables('vnetLink')]",
       "location": "global",
       "dependsOn": [
         "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDnsName'))]"
@@ -177,7 +181,7 @@
     {
       "type": "Microsoft.DBforMySQL/flexibleServers",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]"
+        "[resourceId('Microsoft.Network/privateDnsZones/virtualNetworkLinks',variables('vnetLink'))]"
       ],
       "apiVersion": "2021-05-01",
       "name": "[variables('dbServerName')]",
