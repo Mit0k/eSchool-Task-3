@@ -1,14 +1,14 @@
 variables:
   location: "eastus"
-  groupName: "fdb"
-  prefix: "fdbtako"
+  groupName: "test"
+  prefix: "test"
 
   PROJECT: $(System.TeamProject)
   ORG: $(System.TeamFoundationCollectionUri)
   variableGroupsNotExist: ""
 
 trigger:
-  - master
+  - test
 
 pool:
   vmImage: "windows-latest"
