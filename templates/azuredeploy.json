@@ -139,13 +139,13 @@
   "resources": [
     {
       "type": "Microsoft.Network/privateDnsZones",
-      "apiVersion": "2018-09-01",
+      "apiVersion": "2020-06-01",
       "name": "[variables('privateDnsName')]",
       "location": "global"
     },
     {
       "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
-      "apiVersion": "2018-09-01",
+      "apiVersion": "2020-06-01",
       "name": "[concat(variables('privateDnsName'), '/',uniqueString(parameters('prefix')))]",
       "location": "global",
       "dependsOn": [
@@ -160,7 +160,7 @@
     },
     {
       "type": "Microsoft.Network/privateDnsZones/A",
-      "apiVersion": "2018-09-01",
+      "apiVersion": "2020-06-01",
       "name": "[concat(variables('privateDnsName'), '/',variables('dbServerName'))]",
       "dependsOn": [
         "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDnsName'))]"
