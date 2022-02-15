@@ -24,6 +24,22 @@
             "type": "string",
             "value": "[toLower(concat(parameters('resourceName'),'-',parameters('prefix'),'-',parameters('location')))]"
           }
+        },
+        "getIPfromSubnet": {
+          "parameters": [
+            {
+              "name": "addressPrefix",
+              "type": "string"
+            },
+            {
+              "name": "ip",
+              "type": "string"
+            }
+          ],
+          "output": {
+            "type": "string",
+            "value": "[format('{0}.{1}.{2}.{3}',split(parameters('addressPrefix'),'.')[0],split(parameters('addressPrefix'),'.')[1],split(parameters('addressPrefix'),'.')[2],parameters('ip'))]"
+          }
         }
       }
     }
@@ -64,10 +80,15 @@
     },
     "snetAddressPrefix": {
       "type": "string",
+      "defaultValue": "10.2.0.0/24"
+    },
+    "snetDBAddressPrefix": {
+      "type": "string",
       "defaultValue": "10.2.1.0/24"
     }
   },
   "variables": {
+    "vnetLink": "[concat(variables('privateDnsName'), '/',uniqueString(parameters('prefix')))]",
     "planName": "[helpers.uniqueName('plan',parameters('prefix'),parameters('location'))]",
     "planSKU": {
       "name": "S1",
@@ -85,17 +106,18 @@
     "dbProperties": {
       "administratorLogin": "[parameters('databaseUsername')]",
       "administratorLoginPassword": "[parameters('databasePassword')]",
-      "storageProfile": {
-        "storageMB": 102400,
-        "backupRetentionDays": 7,
-        "geoRedundantBackup": "Disabled",
-        "storageAutogrow": "Enabled"
+      "storage": {
+        "storageSizeGB": 20,
+        "iops": 360,
+        "autoGrow": "Enabled"
+      },
+      "network": {
+        "delegatedSubnetResourceId": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')), '/subnets/',variables('snetDBName'))]",
+        "privateDnsZoneResourceId": "[resourceId('Microsoft.Network/privateDnsZones',variables('privateDnsName'))]"
       },
       "version": "5.7",
-      "sslEnforcement": "Enabled",
-      "minimalTlsVersion": "TLS1_2",
       "infrastructureEncryption": "Disabled",
-      "publicNetworkAccess": "Enabled"
+      "publicNetworkAccess": "Disabled"
     },
     "vnetName": "[helpers.uniqueName('vnet',parameters('prefix'),parameters('location'))]",
     "autoscalesettingsName": "autoscalesettings_webapp",
@@ -105,18 +127,61 @@
     "metricAlertsName": "[helpers.uniqueName('metric_alert',parameters('prefix'),parameters('location'))]",
     "actionGroupsName": "[concat('ag-',parameters('location'))]",
     "snetName": "[concat('snet-',parameters('prefix'))]",
+    "snetDBName": "[concat('snet-db-',parameters('prefix'))]",
+    "privateDnsName": "fdb.private.mysql.database.azure.com",
+    "privateDnsARecordIP": "[helpers.getIPfromSubnet(parameters('snetDBAddressPrefix'),'4')]",
     "increaseThreshold": 50,
     "decreaseThreshold": 40,
-    "storageAccountName": "[toLower(format('st{0}{1}',parameters('prefix'),'mitokfunc'))]",
+    "storageAccountName": "[toLower(format('st{0}',uniqueString(parameters('prefix'))))]",
     "storageSku": "Standard_LRS",
     "appInsightsName": "AppInsights",
     "alertAppHostKey": "[format('{0}/host/default', resourceId('Microsoft.Web/sites', variables('alertAppName')))]"
   },
   "resources": [
     {
+      "type": "Microsoft.Network/privateDnsZones",
+      "apiVersion": "2020-06-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ],
+      "name": "[variables('privateDnsName')]",
+      "location": "global"
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('vnetLink')]",
+      "location": "global",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDnsName'))]"
+      ],
+      "properties": {
+        "registrationEnabled": false,
+        "virtualNetwork": {
+          "id": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones/A",
+      "apiVersion": "2020-06-01",
+      "name": "[concat(variables('privateDnsName'), '/',variables('dbServerName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDnsName'))]"
+      ],
+      "properties": {
+        "ttl": 30,
+        "aRecords": [
+          {
+            "ipv4Address": "[variables('privateDnsARecordIP')]"
+          }
+        ]
+      }
+    },
+    {
       "type": "Microsoft.DBforMySQL/flexibleServers",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]"
+        "[resourceId('Microsoft.Network/privateDnsZones',variables('privateDnsName'))]"
       ],
       "apiVersion": "2021-05-01",
       "name": "[variables('dbServerName')]",
@@ -138,17 +203,27 @@
             "name": "[variables('snetName')]",
             "properties": {
               "addressPrefix": "[parameters('snetAddressPrefix')]",
-              "serviceEndpoints": [
-                {
-                  "service": "Microsoft.Sql",
-                  "locations": ["[parameters('location')]"]
-                }
-              ],
               "delegations": [
                 {
                   "name": "delegation",
                   "properties": {
                     "serviceName": "Microsoft.Web/serverfarms"
+                  }
+                }
+              ],
+              "privateEndpointNetworkPolicies": "Enabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+          },
+          {
+            "name": "[variables('snetDBName')]",
+            "properties": {
+              "addressPrefix": "[parameters('snetDBAddressPrefix')]",
+              "delegations": [
+                {
+                  "name": "dlg-Microsoft.DBforMySQL-flexibleServers",
+                  "properties": {
+                    "serviceName": "Microsoft.DBforMySQL/flexibleServers"
                   }
                 }
               ],
@@ -204,7 +279,7 @@
           },
           {
             "name": "DATASOURCE_USERNAME",
-            "value": "[format('{0}@{1}',parameters('databaseUsername'),variables('dbServerName'))]"
+            "value": "[format('{0}',parameters('databaseUsername'))]"
           },
           {
             "name": "DATASOURCE_PASSWORD",
