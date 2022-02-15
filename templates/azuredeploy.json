@@ -80,7 +80,7 @@
     "projectDatabaseName": "eschool",
     "dbServerName": "[helpers.uniqueName('db',parameters('prefix'),parameters('location'))]",
     "dbSKU": {
-      "name": "Standard_D4ds_v4"
+      "name": "Standard_B1ms"
     },
     "dbProperties": {
       "administratorLogin": "[parameters('databaseUsername')]",
