@@ -91,7 +91,7 @@
         "geoRedundantBackup": "Disabled",
         "storageAutogrow": "Enabled"
       },
-      "version": "8",
+      "version": "8.0",
       "sslEnforcement": "Enabled",
       "minimalTlsVersion": "TLS1_2",
       "infrastructureEncryption": "Disabled",
