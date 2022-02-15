@@ -218,19 +218,6 @@
       }
     },
     {
-      "type": "Microsoft.DBforMySQL/flexibleServers/virtualNetworkRules",
-      "apiVersion": "2017-12-01",
-      "name": "[concat(variables('dbServerName'), '/webappAcceess')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.DBforMySQL/flexibleServers', variables('dbServerName'))]",
-        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
-      ],
-      "properties": {
-        "virtualNetworkSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('snetName'))]",
-        "ignoreMissingVnetServiceEndpoint": false
-      }
-    },
-    {
       "type": "Microsoft.Web/sites",
       "apiVersion": "2021-02-01",
       "name": "[variables('webAppName')]",
