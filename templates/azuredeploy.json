@@ -189,7 +189,7 @@
     {
       "type": "Microsoft.DBforMySQL/flexibleServers",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/privateDnsZones/virtualNetworkLinks','',variables('privateDnsName'))]"
+        "[resourceId('Microsoft.Network/privateDnsZones/virtualNetworkLinks',variables('privateDnsName'),uniqueString(parameters('prefix')))]"
       ],
       "apiVersion": "2021-05-01",
       "name": "[variables('dbServerName')]",
