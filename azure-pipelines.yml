@@ -1,0 +1,47 @@
+variables:
+  location: "eastus"
+  groupName: "odin"
+  prefix: "odin"
+
+  PROJECT: $(System.TeamProject)
+  ORG: $(System.TeamFoundationCollectionUri)
+
+trigger:
+  - master
+
+pool:
+  vmImage: "windows-latest"
+
+stages:
+  - stage: ARM_Testing
+    jobs:
+      - job: ARMTTK
+        steps:
+          - task: RunARMTTKTests@1
+            displayName: Run ARM TTK tests
+            name: TTKtests
+            inputs:
+              templatelocation: '$(System.DefaultWorkingDirectory)\templates'
+              resultLocation: '$(System.DefaultWorkingDirectory)\results'
+
+          - task: PublishTestResults@2
+            displayName: Publish test restults
+            name: PublishResults
+            inputs:
+              testResultsFormat: "NUnit"
+              testResultsFiles: '$(System.DefaultWorkingDirectory)\results\*-armttk.xml'
+  - stage: Deploying_infrastructure
+    jobs:
+      - job: ARM_Template_deploying
+        steps:
+          - task: AzurePowerShell@5
+            name: PS_Deployment
+            inputs:
+              azureSubscription: "AzureNew"
+              ScriptType: "FilePath"
+              ScriptPath: "templates/azuredeploy.ps1"
+              ScriptArguments: -Location ${env:location} -ResourceGroupName ${env:groupName} -prefix ${env:prefix} -DatabasePassword $env:MAPPED_ENV_DB_PASS -slackURL $env:MAPPED_SLACK_URL
+              azurePowerShellVersion: "LatestVersion"
+            env:
+              MAPPED_ENV_DB_PASS: $(DatabasePassword),
+              MAPPED_SLACK_URL: $(slackURL)
