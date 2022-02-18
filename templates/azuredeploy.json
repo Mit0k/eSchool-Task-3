@@ -136,7 +136,7 @@
     "actionGroupsName": "[concat('ag-',parameters('location'))]",
     "snetName": "[concat('snet-',parameters('prefix'))]",
     "snetDBName": "[concat('snet-db-',parameters('prefix'))]",
-    "privateDnsName": "fdb.private.mysql.database.azure.com",
+    "privateDnsName": "[format('{0}.private.mysql.database.azure.com',parameters('prefix'))]",
     "privateDnsARecordIP": "[helpers.getIPfromSubnet(parameters('snetDBAddressPrefix'),'4')]",
     "increaseThreshold": 50,
     "decreaseThreshold": 35,
