@@ -140,7 +140,7 @@
     "privateDnsARecordIP": "[helpers.getIPfromSubnet(parameters('snetDBAddressPrefix'),'4')]",
     "increaseThreshold": 50,
     "decreaseThreshold": 35,
-    "storageAccountName": "[toLower(format('st{0}{1}',parameters('prefix'),uniqueString(parameters('prefix'))))]",
+    "storageAccountName": "[take(toLower(format('st{0}{1}',parameters('prefix'),uniqueString(parameters('prefix')))),24)]",
     "storageSku": "Standard_LRS",
     "appInsightsName": "AppInsights",
     "alertAppHostKey": "[format('{0}/host/default', resourceId('Microsoft.Web/sites', variables('alertAppName')))]"
@@ -189,7 +189,7 @@
     {
       "type": "Microsoft.DBforMySQL/flexibleServers",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/privateDnsZones/virtualNetworkLinks',variables('privateDnsName'),uniqueString(parameters('prefix')))]"
+        "[resourceId('Microsoft.Network/privateDnsZones/virtualNetworkLinks',variables('privateDnsName'),variables('vnetLink'))]"
       ],
       "apiVersion": "2021-05-01",
       "name": "[variables('dbServerName')]",
