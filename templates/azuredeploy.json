@@ -96,7 +96,8 @@
     }
   },
   "variables": {
-    "vnetLink": "[concat(variables('privateDnsName'), '/',uniqueString(parameters('prefix')))]",
+    "vnetLinkSuffix": "[uniqueString(parameters('prefix'))]",
+    "vnetLink": "[concat(variables('privateDnsName'), '/',variables('vnetLinkSuffix'))]",
     "planName": "[helpers.uniqueName('plan',parameters('prefix'),parameters('location'))]",
     "planSKU": {
       "name": "S1",
@@ -189,7 +190,7 @@
     {
       "type": "Microsoft.DBforMySQL/flexibleServers",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/privateDnsZones/virtualNetworkLinks',variables('privateDnsName'),variables('vnetLink'))]"
+        "[resourceId('Microsoft.Network/privateDnsZones/virtualNetworkLinks',variables('privateDnsName'),variables('vnetLinkSuffix'))]"
       ],
       "apiVersion": "2021-05-01",
       "name": "[variables('dbServerName')]",
