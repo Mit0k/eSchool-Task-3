@@ -602,18 +602,5 @@
       }
     }
   ],
-  "outputs": {
-    "webappName": {
-      "type": "string",
-      "value": "[variables('webAppName')]"
-    },
-    "serverName": {
-      "type": "string",
-      "value": "[variables('dbServerName')]"
-    },
-    "dbUsername": {
-      "type": "string",
-      "value": "[parameters('databaseUsername')]"
-    }
-  }
+  "outputs": {}
 }
