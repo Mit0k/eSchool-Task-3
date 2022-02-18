@@ -140,7 +140,7 @@
     "privateDnsARecordIP": "[helpers.getIPfromSubnet(parameters('snetDBAddressPrefix'),'4')]",
     "increaseThreshold": 50,
     "decreaseThreshold": 35,
-    "storageAccountName": "[toLower(format('st{0}',uniqueString(parameters('prefix'))))]",
+    "storageAccountName": "[toLower(format('st{0}{1}',parameters('prefix'),uniqueString(parameters('prefix'))))]",
     "storageSku": "Standard_LRS",
     "appInsightsName": "AppInsights",
     "alertAppHostKey": "[format('{0}/host/default', resourceId('Microsoft.Web/sites', variables('alertAppName')))]"
