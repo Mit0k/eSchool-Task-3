@@ -37,7 +37,7 @@ stages:
           - task: AzurePowerShell@5
             name: PS_Deployment
             inputs:
-              azureSubscription: "Azure2"
+              azureSubscription: "AzureNew"
               ScriptType: "FilePath"
               ScriptPath: "templates/azuredeploy.ps1"
               ScriptArguments: -Location ${env:location} -ResourceGroupName ${env:groupName} -prefix ${env:prefix} -DatabasePassword $env:MAPPED_ENV_DB_PASS -slackURL $env:MAPPED_SLACK_URL
