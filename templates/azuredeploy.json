@@ -65,6 +65,14 @@
       },
       "defaultValue": 75
     },
+    "minInstances": {
+      "type": "int",
+      "defaultValue": 1
+    },
+    "maxInstances": {
+      "type": "int",
+      "defaultValue": 2
+    },
     "slackURL": {
       "type": "securestring"
     },
@@ -131,7 +139,7 @@
     "privateDnsName": "fdb.private.mysql.database.azure.com",
     "privateDnsARecordIP": "[helpers.getIPfromSubnet(parameters('snetDBAddressPrefix'),'4')]",
     "increaseThreshold": 50,
-    "decreaseThreshold": 40,
+    "decreaseThreshold": 35,
     "storageAccountName": "[toLower(format('st{0}',uniqueString(parameters('prefix'))))]",
     "storageSku": "Standard_LRS",
     "appInsightsName": "AppInsights",
@@ -328,8 +336,8 @@
           {
             "name": "Autoscale properties",
             "capacity": {
-              "minimum": "1",
-              "maximum": "2",
+              "minimum": "[parameters('minInstances')]",
+              "maximum": "[parameters('maxInstances')]",
               "default": "1"
             },
             "rules": [
@@ -594,18 +602,5 @@
       }
     }
   ],
-  "outputs": {
-    "webappName": {
-      "type": "string",
-      "value": "[variables('webAppName')]"
-    },
-    "serverName": {
-      "type": "string",
-      "value": "[variables('dbServerName')]"
-    },
-    "dbUsername": {
-      "type": "string",
-      "value": "[parameters('databaseUsername')]"
-    }
-  }
+  "outputs": {}
 }
