@@ -2,7 +2,7 @@ param($Location, $ResourceGroupName, $TemplateFile, $TemplateParameterFile, $pre
 $TemplateFile="templates\azuredeploy.json"
 $TemplateParameterFile="templates\azuredeploy.parameters.json"
 $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
-. "../scripts/generatePass.ps1"
+. "/scripts/generatePass.ps1"
 
 if (!$prefix) {$prefix = 'armeschool'}
 if (!$ResourceGroupName.StartsWith("rg")) { $ResourceGroupName = "rg-"+$ResourceGroupName+"-"+$Location }
