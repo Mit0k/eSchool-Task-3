@@ -15,7 +15,7 @@ if ($notPresent) { New-AzResourceGroup -Name $ResourceGroupName -Location $Locat
 $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
 $deploymentName="WebAppDeploy"+"${today}"
 
-$DatabasePassword = ConvertTo-SecureString Get-RandomPassword 8  -AsPlainText -Force
+$DatabasePassword = ConvertTo-SecureString (Get-RandomPassword 8)  -AsPlainText -Force
 $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
 
 Write-Host "##[debug]Validating template"
