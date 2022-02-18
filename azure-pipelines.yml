@@ -42,3 +42,5 @@ stages:
               ScriptPath: "templates/azuredeploy.ps1"
               ScriptArguments: -Location ${env:location} -ResourceGroupName ${env:groupName} -prefix ${env:prefix} -slackURL $env:MAPPED_SLACK_URL
               azurePowerShellVersion: "LatestVersion"
+            env:
+              MAPPED_SLACK_URL: $(slackURL)
