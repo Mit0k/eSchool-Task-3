@@ -11,7 +11,7 @@ $rgMetricsName="rg-"+$prefix+"-common-metrics-"+$Location
 $rgWebAppName= "rg-"+$prefix+"-APP-"+$Location
 
 $ResourceGroupNames = $rgCommonName,$rgMetricsName,$rgWebAppName
-
+Write-Host "##[debug]$ResourceGroupNames"
 Foreach ($rg in $ResourceGroupNames){
     Get-AzResourceGroup -Name $rg -ErrorVariable notPresent -ErrorAction silentlycontinue
     if ($notPresent) {
