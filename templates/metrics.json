@@ -1,0 +1,241 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "functions": [],
+  "parameters": {
+    "prefix": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "cpuThreshold": {
+      "type": "int",
+      "metadata": {
+        "description": "description"
+      },
+      "defaultValue": 75
+    },
+    "slackURL": {
+      "type": "securestring"
+    },
+    "alertScript": {
+      "type": "string",
+      "metadata": {
+        "description": "description"
+      }
+    }
+  },
+  "variables": {
+    "mainAppPlanname": "[format('plan-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "alertAppName": "[format('func-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "alertAppPlanName": "[format('plan-alert-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "alertFunctionName": "SlackTrigger",
+    "metricAlertsName": "[format('metric-alert-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "actionGroupsName": "[concat('ag-',parameters('location'))]",
+    "storageAccountName": "[take(toLower(format('st{0}{1}',parameters('prefix'),uniqueString(parameters('prefix')))),24)]",
+    "storageSku": "Standard_LRS",
+    "appInsightsName": "AppInsights",
+    "alertAppHostKey": "[format('{0}/host/default', resourceId('Microsoft.Web/sites', variables('alertAppName')))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[variables('appInsightsName')]",
+      "location": "[parameters('location')]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2021-04-01",
+      "name": "[variables('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[variables('storageSku')]"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "supportsHttpsTrafficOnly": true,
+        "encryption": {
+          "services": {
+            "file": {
+              "keyType": "Account",
+              "enabled": true
+            },
+            "blob": {
+              "keyType": "Account",
+              "enabled": true
+            }
+          },
+          "keySource": "Microsoft.Storage"
+        },
+        "accessTier": "Hot"
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2021-02-01",
+      "name": "[variables('alertAppPlanName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Y1",
+        "tier": "Dynamic",
+        "size": "Y1",
+        "family": "Y",
+        "capacity": 0
+      },
+      "kind": "functionapp"
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2020-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('alertAppPlanName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ],
+      "name": "[variables('alertAppName')]",
+      "location": "[parameters('location')]",
+      "kind": "functionapp",
+      "properties": {
+        "enabled": true,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms',variables('alertAppPlanName'))]",
+        "siteConfig": {
+          "numberOfWorkers": 1,
+          "httpsOnly": true,
+          "appSettings": [
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName'))).InstrumentationKey]"
+            },
+            {
+              "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "[format('InstrumentationKey={0}', reference(resourceId('Microsoft.Insights/components', variables('appInsightsName'))).InstrumentationKey)]"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-04-01').keys[0].value)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-04-01').keys[0].value)]"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "dotnet"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~4"
+            },
+            {
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[toLower(variables('alertAppName'))]"
+            },
+            {
+              "name": "SLACK_URL",
+              "value": "[parameters('slackURL')]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/functions",
+      "apiVersion": "2020-12-01",
+      "name": "[format('{0}/{1}', variables('alertAppName'), variables('alertFunctionName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('alertAppName'))]"
+      ],
+      "properties": {
+        "config": {
+          "disabled": false,
+          "bindings": [
+            {
+              "name": "req",
+              "type": "httpTrigger",
+              "direction": "in",
+              "authLevel": "function",
+              "methods": ["get", "post"]
+            },
+            {
+              "name": "$return",
+              "type": "http",
+              "direction": "out"
+            }
+          ]
+        },
+        "files": {
+          "run.csx": "[parameters('alertScript')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.insights/actionGroups",
+      "apiVersion": "2021-09-01",
+      "name": "[variables('actionGroupsName')]",
+      "location": "Global",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('alertAppName'))]"
+      ],
+      "properties": {
+        "groupShortName": "[variables('actionGroupsName')]",
+        "enabled": true,
+        "azureFunctionReceivers": [
+          {
+            "name": "CpuAlert",
+            "functionAppResourceId": "[resourceId('Microsoft.Web/sites', variables('alertAppName'))]",
+            "httpTriggerUrl": "[uri(format('https://{0}.azurewebsites.net',variables('alertAppName')),format('/api/{0}?code={1}',variables('alertFunctionName'),listKeys(variables('alertAppHostKey'), '2020-12-01').functionKeys.default))]",
+            "functionName": "[variables('alertFunctionName')]",
+            "useCommonAlertSchema": false
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.insights/metricAlerts",
+      "apiVersion": "2018-03-01",
+      "name": "[variables('metricAlertsName')]",
+      "location": "global",
+      "dependsOn": [
+        "[resourceId('Microsoft.insights/actionGroups', variables('actionGroupsName'))]"
+      ],
+      "properties": {
+        "description": "A",
+        "severity": 0,
+        "enabled": true,
+        "scopes": [], //SCOPES
+        "evaluationFrequency": "PT1M",
+        "windowSize": "PT1M",
+        "criteria": {
+          "allOf": [
+            {
+              "threshold": "[parameters('cpuThreshold')]",
+              "name": "Metric1",
+              "metricNamespace": "Microsoft.Web/serverFarms",
+              "metricName": "CpuPercentage",
+              "operator": "GreaterThan",
+              "timeAggregation": "Average",
+              "criterionType": "StaticThresholdCriterion"
+            }
+          ],
+          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria"
+        },
+        "autoMitigate": true,
+        "targetResourceType": "Microsoft.Web/serverFarms",
+        "actions": [
+          {
+            "actionGroupId": "[resourceId('Microsoft.insights/actionGroups', variables('actionGroupsName'))]"
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {}
+}

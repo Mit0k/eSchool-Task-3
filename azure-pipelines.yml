@@ -1,13 +1,12 @@
 variables:
   location: "eastus"
-  groupName: "test"
-  prefix: "testcase"
+  prefix: "legion"
 
   PROJECT: $(System.TeamProject)
   ORG: $(System.TeamFoundationCollectionUri)
 
 trigger:
-  - master
+  - tester
 
 pool:
   vmImage: "windows-latest"
@@ -40,7 +39,7 @@ stages:
               azureSubscription: "AzureNew"
               ScriptType: "FilePath"
               ScriptPath: "templates/azuredeploy.ps1"
-              ScriptArguments: -Location ${env:location} -ResourceGroupName ${env:groupName} -prefix ${env:prefix} -slackURL $env:MAPPED_SLACK_URL
+              ScriptArguments: -Location ${env:location} -prefix ${env:prefix} -slackURL $env:MAPPED_SLACK_URL
               azurePowerShellVersion: "LatestVersion"
             env:
               MAPPED_SLACK_URL: $(slackURL)

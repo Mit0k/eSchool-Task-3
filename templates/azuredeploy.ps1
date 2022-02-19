@@ -1,15 +1,25 @@
-param($Location, $ResourceGroupName, $TemplateFile, $TemplateParameterFile, $prefix, $slackURL)
+param($Location, $TemplateFile, $TemplateParameterFile, $prefix, $slackURL)
 $TemplateFile="templates\azuredeploy.json"
 $TemplateParameterFile="templates\azuredeploy.parameters.json"
 $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
 . "scripts\generatePass.ps1"
 if (!$prefix) {$prefix = 'armeschool'}
-if (!$ResourceGroupName.StartsWith("rg")) { $ResourceGroupName = "rg-"+$ResourceGroupName+"-"+$Location }
 Write-Host "##[debug]Getting resource group"
 
-Get-AzResourceGroup -Name $ResourceGroupName -ErrorVariable notPresent -ErrorAction silentlycontinue
-Write-Host $notPresent
-if ($notPresent) { New-AzResourceGroup -Name $ResourceGroupName -Location $Location}
+$rgCommonName= "rg-"+$prefix+"-common-base-"+$Location
+$rgMetricsName="rg-"+$prefix+"-common-metrics-"+$Location
+$rgWebAppName= "rg-"+$prefix+"-APP-"+$Location
+
+$ResourceGroupNames = $rgCommonName,$rgMetricsName,$rgWebAppName
+
+Foreach ($rg in $ResourceGroupNames){
+    Get-AzResourceGroup -Name $rg -ErrorVariable notPresent -ErrorAction silentlycontinue
+    if ($notPresent) {
+        New-AzResourceGroup -Name $ResourceGroupName -Location $Location
+    }
+}
+
+
 
 $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
 $deploymentName="WebAppDeploy"+"${today}"
@@ -26,8 +36,8 @@ if ($notValid) {
 }
 
 Write-Host "##[debug]Deploying template"
-New-AzResourceGroupDeployment `
-    -Name $deploymentName -ResourceGroupName $ResourceGroupName -Location $Location `
+New-AzDeployment `
+    -Name $deploymentName -Location $Location `
     -TemplateFile $TemplateFile -TemplateParameterFile $TemplateParameterFile `
     -prefix $prefix  -databasePassword $databasePassword `
     -slackURL $slackURL -alertScript $alertScript

@@ -1,0 +1,208 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "functions": [],
+  "parameters": {
+    "prefix": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "databaseUsername": {
+      "type": "string",
+      "defaultValue": "mysqladmin"
+    },
+    "databasePassword": {
+      "type": "securestring"
+    },
+    "minInstances": {
+      "type": "int"
+    },
+    "maxInstances": {
+      "type": "int"
+    },
+    "commonRG": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "planName": "[format('plan-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "planSKU": {
+      "name": "S1",
+      "tier": "Standard",
+      "size": "S1",
+      "family": "S",
+      "capacity": 1
+    },
+    "webAppName": "[format('app-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "dbServerName": "[format('db-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "projectDatabaseName": "eschool",
+    "vnetName": "[format('vnet-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "autoscalesettingsName": "autoscalesettings_webapp",
+    "snetName": "[concat('snet-',parameters('prefix'))]",
+    "increaseThreshold": 50,
+    "decreaseThreshold": 35
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2021-02-01",
+      "name": "[variables('planName')]",
+      "location": "[parameters('location')]",
+      "sku": "[variables('planSKU')]",
+      "kind": "linux",
+      "properties": {
+        "perSiteScaling": false,
+        "elasticScaleEnabled": false,
+        "maximumElasticWorkerCount": 1,
+        "isSpot": false,
+        "reserved": true,
+        "isXenon": false,
+        "hyperV": false,
+        "targetWorkerCount": 0,
+        "targetWorkerSizeId": 0,
+        "zoneRedundant": false
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2021-02-01",
+      "name": "[concat(variables('webAppName'), '/web')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('webAppName'))]"
+      ],
+      "properties": {
+        "numberOfWorkers": 1,
+        "linuxFxVersion": "JAVA|8-jre8",
+        "alwaysOn": true,
+        "appCommandLine": "java -jar /home/site/wwwroot/eschool.jar",
+        "managedPipelineMode": "Integrated",
+        "loadBalancing": "LeastRequests",
+        "vnetName": "[variables('vnetName')]",
+        "vnetRouteAllEnabled": true,
+        "appSettings": [
+          {
+            "name": "DATASOURCE_URL",
+            "value": "[format('jdbc:mysql://{0}.mysql.database.azure.com:3306/{1}?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=true',variables('dbServerName'),variables('projectDatabaseName'))]"
+          },
+          {
+            "name": "DATASOURCE_USERNAME",
+            "value": "[format('{0}',parameters('databaseUsername'))]"
+          },
+          {
+            "name": "DATASOURCE_PASSWORD",
+            "value": "[parameters('databasePassword')]"
+          },
+          {
+            "name": "ESCHOOL_APP_HOST",
+            "value": "[format('{0}.azurewebsites.net',variables('webAppName'))]"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2021-02-01",
+      "name": "[variables('webAppName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]",
+        "[resourceId(parameters('commonRG'),'Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ],
+      "kind": "app,linux",
+      "properties": {
+        "enabled": true,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]",
+        "reserved": true,
+        "siteConfig": {
+          "numberOfWorkers": 1,
+          "linuxFxVersion": "JAVA|8-jre8",
+          "alwaysOn": true
+        },
+        "virtualNetworkSubnetId": "[resourceId(parameters('commonRG'),'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('snetName'))]"
+      }
+    },
+    {
+      "type": "Microsoft.insights/autoscalesettings",
+      "apiVersion": "2021-05-01-preview",
+      "name": "[variables('autoscalesettingsName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('webAppName'))]",
+        "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]"
+      ],
+      "properties": {
+        "profiles": [
+          {
+            "name": "Autoscale properties",
+            "capacity": {
+              "minimum": "[parameters('minInstances')]",
+              "maximum": "[parameters('maxInstances')]",
+              "default": "1"
+            },
+            "rules": [
+              {
+                "metricTrigger": {
+                  "metricName": "Requests",
+                  "metricNamespace": "Microsoft.web/sites",
+                  "metricResourceUri": "[resourceId('Microsoft.Web/sites',  variables('webAppName'))]",
+                  "timeGrain": "PT1M",
+                  "statistic": "Average",
+                  "timeWindow": "PT5M",
+                  "timeAggregation": "Total",
+                  "operator": "GreaterThan",
+                  "threshold": "[variables('increaseThreshold')]"
+                },
+                "scaleAction": {
+                  "direction": "Increase",
+                  "type": "ChangeCount",
+                  "value": "1",
+                  "cooldown": "PT5M"
+                }
+              },
+              {
+                "metricTrigger": {
+                  "metricName": "Requests",
+                  "metricNamespace": "Microsoft.web/sites",
+                  "metricResourceUri": "[resourceId('Microsoft.Web/sites', variables('webAppName'))]",
+                  "timeGrain": "PT1M",
+                  "statistic": "Average",
+                  "timeWindow": "PT5M",
+                  "timeAggregation": "Total",
+                  "operator": "LessThan",
+                  "threshold": "[variables('decreaseThreshold')]"
+                },
+                "scaleAction": {
+                  "direction": "Decrease",
+                  "type": "ChangeCount",
+                  "value": "1",
+                  "cooldown": "PT5M"
+                }
+              }
+            ]
+          }
+        ],
+        "enabled": true,
+        "name": "[variables('autoscalesettingsName')]",
+        "targetResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/virtualNetworkConnections",
+      "apiVersion": "2021-02-01",
+      "name": "[concat(variables('webAppName'), '/',variables('vnetName'))]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('webAppName'))]",
+        "[resourceId(parameters('commonRG'),'Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ],
+      "properties": {
+        "vnetResourceId": "[resourceId(parameters('commonRG'),'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('snetName'))]",
+        "isSwift": true
+      }
+    }
+  ],
+  "outputs": {}
+}
