@@ -67,8 +67,8 @@
       "name": "deployCommonBase",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      //"location": "[parameters('location')]",
-      //"resourceGroup": "[variables('rg1')]",
+      "location": "[parameters('location')]",
+      "resourceGroup": "[variables('rg1')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -106,11 +106,8 @@
       "name": "deployCommonMetrics",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      //"resourceGroup": "[variables('rg2')]",
-      //"location": "[parameters('location')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'deployCommonBase')]"
-      ],
+      "resourceGroup": "[variables('rg2')]",
+      "location": "[parameters('location')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -139,15 +136,12 @@
       "name": "deployWebApp",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      //"location": "[parameters('location')]",
-      //"resourceGroup": "[variables('rg3')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'deployCommonMetrics')]"
-      ],
+      "location": "[parameters('location')]",
+      "resourceGroup": "[variables('rg3')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "relativePath": "templates/webapp.json"
+          "relativePath": "webapp.json"
         },
         "parameters": {
           "commonRG": {
