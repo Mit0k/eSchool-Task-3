@@ -108,6 +108,9 @@
       "apiVersion": "2021-04-01",
       "resourceGroup": "[variables('rg2')]",
       "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'deployCommonBase')]"
+      ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -138,6 +141,9 @@
       "apiVersion": "2021-04-01",
       "location": "[parameters('location')]",
       "resourceGroup": "[variables('rg3')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'deployCommonMetrics')]"
+      ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
