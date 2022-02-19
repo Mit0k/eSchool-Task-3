@@ -15,7 +15,7 @@ Write-Host "##[debug]$ResourceGroupNames"
 Foreach ($rg in $ResourceGroupNames){
     Get-AzResourceGroup -Name $rg -ErrorVariable notPresent -ErrorAction silentlycontinue
     if ($notPresent) {
-        New-AzResourceGroup -Name $ResourceGroupName -Location $Location
+        New-AzResourceGroup -Name $rg -Location $Location
     }
 }
 
