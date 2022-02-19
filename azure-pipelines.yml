@@ -1,7 +1,7 @@
 variables:
   location: "eastus"
-  groupName: "testi"
-  prefix: "bozmge"
+  groupName: "test"
+  prefix: "testcase"
 
   PROJECT: $(System.TeamProject)
   ORG: $(System.TeamFoundationCollectionUri)
