@@ -57,14 +57,18 @@
       "defaultValue": "4"
     }
   },
-  "variables": {},
+  "variables": {
+    "rg1": "[format('rg-{0}-common-base-{1}',parameters('prefix'),parameters('location'))]",
+    "rg2": "[format('rg-{0}-common-metrics-{1}',parameters('prefix'),parameters('location'))]",
+    "rg3": "[format('rg-{0}-APP-{1}',parameters('prefix'),parameters('location'))]"
+  },
   "resources": [
     {
       "name": "deployCommonBase",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "location": "[parameters('location')]",
-      "resourceGroup": "[format('rg-{0}-common-base-{1}',parameters('prefix'),parameters('location'))]",
+      //"location": "[parameters('location')]",
+      //"resourceGroup": "[variables('rg1')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -102,8 +106,8 @@
       "name": "deployCommonMetrics",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "resourceGroup": "[format('rg-{0}-common-metrics-{1}',parameters('prefix'),parameters('location'))]",
-      "location": "[parameters('location')]",
+      //"resourceGroup": "[variables('rg2')]",
+      //"location": "[parameters('location')]",
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'deployCommonBase')]"
       ],
@@ -135,19 +139,19 @@
       "name": "deployWebApp",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "location": "[parameters('location')]",
-      "resourceGroup": "[format('rg-{0}-APP-{1}',parameters('prefix'),parameters('location'))]",
+      //"location": "[parameters('location')]",
+      //"resourceGroup": "[variables('rg3')]",
       "dependsOn": [
         "[resourceId('Microsoft.Resources/deployments', 'deployCommonMetrics')]"
       ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "relativePath": "webapp.json"
+          "relativePath": "templates/webapp.json"
         },
         "parameters": {
           "commonRG": {
-            "value": "[reference('deployCommonBase').resourceGroup]"
+            "value": "loler"
           },
           "prefix": {
             "value": "[parameters('prefix')]"

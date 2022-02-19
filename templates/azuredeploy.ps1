@@ -32,7 +32,7 @@ $notValid=Test-AzDeployment -ErrorVariable notValid -ErrorAction SilentlyContinu
 if ($notValid) {
     Write-Host $notValid.Message
     Write-Host "Template is not valid according to the validation procedure\n Use Get-AzLog -CorrelationId <correlationId> for more info"
-    exit
+    exit 1
 }
 
 Write-Host "##[debug]Deploying template"
