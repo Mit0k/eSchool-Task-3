@@ -284,7 +284,7 @@
         "appSettings": [
           {
             "name": "DATASOURCE_URL",
-            "value": "[format('jdbc:mysql://{0}.mysql.database.azure.com:3306/{1}?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=true&enabledTLSProtocols=TLSv1.2',variables('dbServerName'),variables('projectDatabaseName'))]"
+            "value": "[format('jdbc:mysql://{0}.mysql.database.azure.com:3306/{1}?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=true',variables('dbServerName'),variables('projectDatabaseName'))]"
           },
           {
             "name": "DATASOURCE_USERNAME",

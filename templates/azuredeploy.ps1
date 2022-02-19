@@ -3,7 +3,6 @@ $TemplateFile="templates\azuredeploy.json"
 $TemplateParameterFile="templates\azuredeploy.parameters.json"
 $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
 . "scripts\generatePass.ps1"
-
 if (!$prefix) {$prefix = 'armeschool'}
 if (!$ResourceGroupName.StartsWith("rg")) { $ResourceGroupName = "rg-"+$ResourceGroupName+"-"+$Location }
 Write-Host "##[debug]Getting resource group"
@@ -26,10 +25,9 @@ if ($notValid) {
     exit
 }
 
-
 Write-Host "##[debug]Deploying template"
 New-AzResourceGroupDeployment `
     -Name $deploymentName -ResourceGroupName $ResourceGroupName -Location $Location `
-    -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile `
+    -TemplateFile $TemplateFile -TemplateParameterFile $TemplateParameterFile `
     -prefix $prefix  -databasePassword $databasePassword `
     -slackURL $slackURL -alertScript $alertScript
