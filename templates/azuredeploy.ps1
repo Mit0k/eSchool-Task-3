@@ -1,6 +1,4 @@
-param($Location, $TemplateFile, $TemplateParameterFile, $prefix, $slackURL,$templateUrlList)
-Write-Host $templateUrlList
-$templateUrlList = $templateUrlList.Split('')
+param($Location, $TemplateFile, $TemplateParameterFile, $prefix, $slackURL)
 $TemplateFile="templates\azuredeploy.json"
 $TemplateParameterFile="templates\azuredeploy.parameters.json"
 $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
@@ -30,13 +28,21 @@ $DatabasePassword = ConvertTo-SecureString (Get-RandomPassword 8)  -AsPlainText 
 $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
 
 Write-Host "##[debug]Deploying template"
+New-AzTemplateSpec `
+  -Name webAppSpec `
+  -Version "1.0.0.0" `
+  -ResourceGroupName $ResourceGroupNames[0] `
+  -Location $Location `
+  -TemplateFile "templates\azuredeploy.json"
+
+$id = (Get-AzTemplateSpec -ResourceGroupName $ResourceGroupNames[0] -Name webAppSpec -Version "1.0.0.0").Versions.Id
+
 $errorMessage=New-AzDeployment `
-    -DeploymentDebugLogLevel All -ErrorVariable notValid -ErrorAction SilentlyContinue `
+    -TemplateSpecId $id -TemplateParameterFile $TemplateParameterFile `
     -Name $deploymentName -Location $Location `
-    -TemplateFile $TemplateFile -TemplateParameterFile $TemplateParameterFile `
     -prefix $prefix  -databasePassword $databasePassword `
     -slackURL $slackURL -alertScript $alertScript `
-    -RgList $ResourceGroupNames -UrlList $templateUrlList
+    -ErrorVariable notValid -ErrorAction SilentlyContinue
 if ($notValid) {
     Write-Host $errorMessage
     Write-Host $notValid

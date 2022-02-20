@@ -18,17 +18,6 @@ stages:
       - job: ARM_Template_deploying
         steps:
           - task: AzurePowerShell@5
-            name: Get_Template_URLs
-            inputs:
-              azureSubscription: "AzureNew"
-              ScriptType: "FilePath"
-              ScriptPath: "scripts/findTemplateURLs.ps1"
-              ScriptArguments: -repoLink ${env:LINK} -branch $(Build.SourceBranchName) -dir ${env:TEMPLATE_DIR} -token $env:MAPPED_GITHUB_TOKEN
-              azurePowerShellVersion: "LatestVersion"
-            env:
-              MAPPED_GITHUB_TOKEN: $(githubToken)
-              TEMPLATE_DIR: "templates/artifacts"
-          - task: AzurePowerShell@5
             name: PS_Deployment
             inputs:
               azureSubscription: "AzureNew"
