@@ -58,20 +58,20 @@
     },
     "RgList": {
       "type": "array",
-      "defaultValue": [null, null, null]
+      "defaultValue": ["rg1", "rg1", "rg1"]
     },
     "UrlList": {
       "type": "array",
-      "defaultValue": [null, null, null]
+      "defaultValue": ["", null, null]
     }
   },
   "variables": {
     "rg1": "[parameters('RgList')[0]]",
-    "rg2": "[parameters('RgList')[0]]",
-    "rg3": "[parameters('RgList')[0]]",
+    "rg2": "[parameters('RgList')[1]]",
+    "rg3": "[parameters('RgList')[2]]",
     "link1": "[parameters('UrlList')[0]]",
-    "link2": "[parameters('RgList')[0]]",
-    "link3": "[parameters('RgList')[0]]"
+    "link2": "[parameters('RgList')[1]]",
+    "link3": "[parameters('RgList')[2]]"
   },
   "resources": [
     {
@@ -108,6 +108,76 @@
           },
           "snetAddressPrefix": {
             "value": "[parameters('snetAddressPrefix')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "deployCommonMetrics",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "resourceGroup": "[variables('rg2')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'deployCommonBase')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "relativePath": "[variables('link2')]"
+        },
+        "parameters": {
+          "prefix": {
+            "value": "[parameters('prefix')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "cpuThreshold": {
+            "value": "[parameters('cpuThreshold')]"
+          },
+          "slackURL": {
+            "value": "[parameters('slackURL')]"
+          },
+          "alertScript": {
+            "value": "[parameters('alertScript')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "deployWebApp",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "resourceGroup": "[variables('rg3')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'deployCommonMetrics')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('link3')]"
+        },
+        "parameters": {
+          "commonRG": {
+            "value": "[variables('rg1')]"
+          },
+          "prefix": {
+            "value": "[parameters('prefix')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "databaseUsername": {
+            "value": "[parameters('databaseUsername')]"
+          },
+          "databasePassword": {
+            "value": "[parameters('databasePassword')]"
+          },
+          "minInstances": {
+            "value": "[parameters('minInstances')]"
+          },
+          "maxInstances": {
+            "value": "[parameters('maxInstances')]"
           }
         }
       }
