@@ -14,6 +14,19 @@ pool:
 stages:
   - stage: Deploying_infrastructure
     jobs:
+      - job: Uploading_templates
+        steps:
+          - task: AzurePowerShell@5
+            name: PS_Deployment
+            inputs:
+              azureSubscription: "AzureNew"
+              ScriptType: "FilePath"
+              ScriptPath: "templates/azuredeploy.ps1"
+              ScriptArguments: -Location ${env:location} -prefix ${env:prefix} -slackURL $env:MAPPED_SLACK_URL
+              azurePowerShellVersion: "LatestVersion"
+            env:
+              MAPPED_SLACK_URL: $(slackURL)
+
       - job: ARM_Template_deploying
         steps:
           - task: AzurePowerShell@5
