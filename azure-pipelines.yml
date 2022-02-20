@@ -15,7 +15,7 @@ pool:
 stages:
   - stage: Deploying_infrastructure
     jobs:
-      - job: Get_Template_URLs
+      - job:
         steps:
           - task: AzurePowerShell@5
             name: Get_Template_URLs
@@ -28,7 +28,6 @@ stages:
             env:
               MAPPED_GITHUB_TOKEN: $(githubToken)
               TEMPLATE_DIR: "templates/artifacts"
-
       - job: ARM_Template_deploying
         steps:
           - task: AzurePowerShell@5
@@ -37,7 +36,7 @@ stages:
               azureSubscription: "AzureNew"
               ScriptType: "FilePath"
               ScriptPath: "templates/azuredeploy.ps1"
-              ScriptArguments: -Location ${env:location} -prefix ${env:prefix} -slackURL $env:MAPPED_SLACK_URL -templateUrlList ${env:templateUrlList}
+              ScriptArguments: -Location ${env:location} -prefix ${env:prefix} -slackURL $env:MAPPED_SLACK_URL -templateUrlList ${Get_Template_URLs.templateUrlList}
               azurePowerShellVersion: "LatestVersion"
             env:
               MAPPED_SLACK_URL: $(slackURL)
