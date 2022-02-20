@@ -24,6 +24,9 @@
       "metadata": {
         "description": "description"
       }
+    },
+    "webAppGroup": {
+      "type": "string"
     }
   },
   "variables": {
@@ -210,7 +213,9 @@
         "description": "A",
         "severity": 0,
         "enabled": true,
-        "scopes": [], //SCOPES
+        "scopes": [
+          "[resourceId(parameters('webAppGroup'), 'Microsoft.Web/serverfarms', variables('mainAppPlanname'))]"
+        ],
         "evaluationFrequency": "PT1M",
         "windowSize": "PT1M",
         "criteria": {
