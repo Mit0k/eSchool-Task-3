@@ -57,10 +57,12 @@
       "defaultValue": "4"
     },
     "RgList": {
-      "type": "array"
+      "type": "array",
+      "defaultValue": []
     },
     "UrlList": {
-      "type": "array"
+      "type": "array",
+      "defaultValue": []
     }
   },
   "variables": {
