@@ -30,12 +30,12 @@ $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
 Write-Host "##[section]Deploying template"
 Write-Host "##[debug][Template spec]::Create"
 New-AzTemplateSpec `
-  -Force
   -Name webAppSpec `
   -Version "1.0.0.0" `
   -ResourceGroupName $ResourceGroupNames[0] `
   -Location $Location `
   -TemplateFile "templates\azuredeploy.json"
+  -Force
 
 Write-Host "##[debug][Template spec]::Getting ID"
 $id = (Get-AzTemplateSpec -ResourceGroupName $ResourceGroupNames[0] -Name webAppSpec -Version "1.0.0.0").Versions.Id
