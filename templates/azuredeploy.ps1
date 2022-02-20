@@ -1,8 +1,11 @@
-param($Location, $TemplateFile, $TemplateParameterFile, $prefix, $slackURL)
+param($Location, $TemplateFile, $TemplateParameterFile, $prefix, $slackURL,$templateUrlList)
+Write-Host $templateUrlList
+exit
 $TemplateFile="templates\azuredeploy.json"
 $TemplateParameterFile="templates\azuredeploy.parameters.json"
 $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
 . "scripts\generatePass.ps1"
+
 if (!$prefix) {$prefix = 'armeschool'}
 Write-Host "##[debug]Getting resource group"
 
@@ -18,8 +21,6 @@ Foreach ($rg in $ResourceGroupNames){
         New-AzResourceGroup -Name $rg -Location $Location
     }
 }
-
-
 
 $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
 $deploymentName="WebAppDeploy"+"${today}"
