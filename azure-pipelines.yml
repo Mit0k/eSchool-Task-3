@@ -27,7 +27,7 @@ stages:
               azurePowerShellVersion: "LatestVersion"
             env:
               MAPPED_GITHUB_TOKEN: $(githubToken)
-              TEMPLATE_DIR: "templates/artifacts/"
+              TEMPLATE_DIR: "/templates/artifacts/"
 
       - job: ARM_Template_deploying
         steps:
