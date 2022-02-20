@@ -78,7 +78,6 @@
       "name": "deployCommonBase",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "location": "[parameters('location')]",
       "resourceGroup": "[variables('rg1')]",
       "properties": {
         "mode": "Incremental",
