@@ -27,15 +27,17 @@ $deploymentName="WebAppDeploy"+"${today}"
 $DatabasePassword = ConvertTo-SecureString (Get-RandomPassword 8)  -AsPlainText -Force
 $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
 
-Write-Host "##[debug]Deploying template"
+Write-Host "##[section]Deploying template"
+Write-Host "##[debug][Template spec]::Create"
 New-AzTemplateSpec `
   -Name webAppSpec `
   -Version "1.0.0.0" `
   -ResourceGroupName $ResourceGroupNames[0] `
   -Location $Location `
   -TemplateFile "templates\azuredeploy.json"
-
+Write-Host "##[debug][Template spec]::Getting ID"
 $id = (Get-AzTemplateSpec -ResourceGroupName $ResourceGroupNames[0] -Name webAppSpec -Version "1.0.0.0").Versions.Id
+Write-Host "##[debug][Template spec]::Deploying"
 
 $errorMessage=New-AzDeployment `
     -TemplateSpecId $id -TemplateParameterFile $TemplateParameterFile `
@@ -44,6 +46,7 @@ $errorMessage=New-AzDeployment `
     -slackURL $slackURL -alertScript $alertScript `
     -ErrorVariable notValid -ErrorAction SilentlyContinue
 if ($notValid) {
+    Write-Host "##[error][Template spec]::Deploying failed"
     Write-Host $errorMessage
     Write-Host $notValid
     Write-Host $notValid.Code
@@ -51,3 +54,4 @@ if ($notValid) {
     Write-Host $notValid.Details
     throw "Template is not valid according to the validation procedure\nTry to Use Get-AzLog -CorrelationId <correlationId> for more info"
 }
+Write-Host "##[endgroup]"
