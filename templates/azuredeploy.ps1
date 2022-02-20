@@ -37,7 +37,7 @@ New-AzDeployment `
     -prefix $prefix  -databasePassword $databasePassword `
     -slackURL $slackURL -alertScript $alertScript `
     -RgList $ResourceGroupNames -UrlList $templateUrlList
-if (!$notValid) {
+if ($notValid) {
     Write-Host $notValid.Code
     Write-Host $notValid.Message
     Write-Host $notValid.Details
