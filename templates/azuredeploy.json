@@ -120,9 +120,9 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "resourceGroup": "[variables('rg2')]",
-      "dependsOn": [
-        "[format('/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}',subscription().subscriptionId,variables('rg1'),'Microsoft.Resources/deployments', 'deployCommonBase')]"
-      ],
+      //"dependsOn": [
+      //  "[format('/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}',subscription().subscriptionId,variables('rg1'),'Microsoft.Resources/deployments', 'deployCommonBase')]"
+      //      ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -152,9 +152,9 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "resourceGroup": "[variables('rg3')]",
-      "dependsOn": [
-        "[format('/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}',subscription().subscriptionId,variables('rg2'),'Microsoft.Resources/deployments', 'deployCommonMetrics')]"
-      ],
+      //"dependsOn": [
+      //  "[format('/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}',subscription().subscriptionId,variables('rg2'),'Microsoft.Resources/deployments', 'deployCommonMetrics')]"
+      //],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
