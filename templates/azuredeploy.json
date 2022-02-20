@@ -118,7 +118,7 @@
       "apiVersion": "2021-04-01",
       "resourceGroup": "[variables('rg2')]",
       "dependsOn": [
-        "[resourceId(variables('rg1'),'Microsoft.Resources/deployments', 'deployCommonBase')]"
+        "[resourceId(subscription().id,variables('rg1'),'Microsoft.Resources/deployments', 'deployCommonBase')]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -150,7 +150,7 @@
       "apiVersion": "2021-04-01",
       "resourceGroup": "[variables('rg3')]",
       "dependsOn": [
-        "[resourceId(variables('rg2'),'Microsoft.Resources/deployments', 'deployCommonMetrics')]"
+        "[resourceId(subscription().id,variables('rg2'),'Microsoft.Resources/deployments', 'deployCommonMetrics')]"
       ],
       "properties": {
         "mode": "Incremental",
