@@ -1,4 +1,4 @@
-param($Location, $TemplateFile, $TemplateParameterFile, $prefix, $slackURL)
+param($Location, $prefix, $slackURL)
 $TemplateFile="templates\azuredeploy.json"
 $TemplateParameterFile="templates\azuredeploy.parameters.json"
 $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
@@ -30,12 +30,13 @@ $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
 Write-Host "##[section]Deploying template"
 Write-Host "##[debug][Template spec]::Create"
 New-AzTemplateSpec `
+  -Force
   -Name webAppSpec `
   -Version "1.0.0.0" `
   -ResourceGroupName $ResourceGroupNames[0] `
   -Location $Location `
   -TemplateFile "templates\azuredeploy.json"
-  
+
 Write-Host "##[debug][Template spec]::Getting ID"
 $id = (Get-AzTemplateSpec -ResourceGroupName $ResourceGroupNames[0] -Name webAppSpec -Version "1.0.0.0").Versions.Id
 Write-Host "##[debug][Template spec]::Deploying"
