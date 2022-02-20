@@ -29,20 +29,17 @@ $deploymentName="WebAppDeploy"+"${today}"
 $DatabasePassword = ConvertTo-SecureString (Get-RandomPassword 8)  -AsPlainText -Force
 $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
 
-Write-Host "##[debug]Validating template"
-$notValid=Test-AzDeployment -ErrorVariable notValid -ErrorAction SilentlyContinue -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -Location $Location 5>&1 
+Write-Host "##[debug]Deploying template"
+New-AzDeployment `
+    -DeploymentDebugLogLevel All -ErrorVariable notValid`
+    -Name $deploymentName -Location $Location `
+    -TemplateFile $TemplateFile -TemplateParameterFile $TemplateParameterFile `
+    -prefix $prefix  -databasePassword $databasePassword `
+    -slackURL $slackURL -alertScript $alertScript `
+    -RgList $ResourceGroupNames -UrlList $templateUrlList
 if (!$notValid) {
     Write-Host $notValid.Code
     Write-Host $notValid.Message
     Write-Host $notValid.Details
     throw "Template is not valid according to the validation procedure\nTry to Use Get-AzLog -CorrelationId <correlationId> for more info"
 }
-
-Write-Host "##[debug]Deploying template"
-New-AzDeployment `
-    -DeploymentDebugLogLevel All `
-    -Name $deploymentName -Location $Location `
-    -TemplateFile $TemplateFile -TemplateParameterFile $TemplateParameterFile `
-    -prefix $prefix  -databasePassword $databasePassword `
-    -slackURL $slackURL -alertScript $alertScript `
-    -RgList $ResourceGroupNames -UrlList $templateUrlList
