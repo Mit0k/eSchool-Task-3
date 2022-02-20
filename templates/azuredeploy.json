@@ -126,7 +126,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "relativePath": "[variables('link2')]"
+          "uri": "[variables('link2')]"
         },
         "parameters": {
           "prefix": {
