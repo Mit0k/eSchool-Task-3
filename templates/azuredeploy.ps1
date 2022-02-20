@@ -30,13 +30,17 @@ $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
 Write-Host "##[section]Deploying template"
 Write-Host "##[debug][Template spec]::Create"
 New-AzTemplateSpec `
-  -Name webAppSpec `
-  -Version "1.0.0.0" `
-  -ResourceGroupName $ResourceGroupNames[0] `
-  -Location $Location `
-  -TemplateFile "templates\azuredeploy.json"
-  -Force
-
+    -Name webAppSpec `
+    -Version "1.0.0.0" `
+    -ResourceGroupName $ResourceGroupNames[0] `
+    -Location $Location `
+    -TemplateFile "templates\azuredeploy.json" `
+    -Force -Confirm:$false `
+    -ErrorVariable notValid -ErrorAction SilentlyContinue
+Write-Host $notValid
+Write-Host $notValid.Code
+Write-Host $notValid.Message
+Write-Host $notValid.Details
 Write-Host "##[debug][Template spec]::Getting ID"
 $id = (Get-AzTemplateSpec -ResourceGroupName $ResourceGroupNames[0] -Name webAppSpec -Version "1.0.0.0").Versions.Id
 Write-Host "##[debug][Template spec]::Deploying"
@@ -54,6 +58,6 @@ if ($notValid) {
     Write-Host $notValid.Code
     Write-Host $notValid.Message
     Write-Host $notValid.Details
-    throw "Template is not valid according to the validation procedure\nTry to Use Get-AzLog -CorrelationId <correlationId> for more info"
+    throw "Template is not valid according to the validation procedure`nTry to Use Get-AzLog -CorrelationId <correlationId> for more info"
 }
 Write-Host "##[endgroup]"
