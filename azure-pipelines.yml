@@ -38,3 +38,4 @@ stages:
               azurePowerShellVersion: "LatestVersion"
             env:
               MAPPED_SLACK_URL: $(slackURL)
+              templateUrlList: $(Get_Template_URLs.templateUrlList)
