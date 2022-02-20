@@ -35,6 +35,7 @@ New-AzTemplateSpec `
   -ResourceGroupName $ResourceGroupNames[0] `
   -Location $Location `
   -TemplateFile "templates\azuredeploy.json"
+  
 Write-Host "##[debug][Template spec]::Getting ID"
 $id = (Get-AzTemplateSpec -ResourceGroupName $ResourceGroupNames[0] -Name webAppSpec -Version "1.0.0.0").Versions.Id
 Write-Host "##[debug][Template spec]::Deploying"
