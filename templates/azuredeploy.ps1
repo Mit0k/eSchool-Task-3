@@ -1,6 +1,5 @@
 param($Location, $TemplateFile, $TemplateParameterFile, $prefix, $slackURL,$templateUrlList)
 Write-Host $templateUrlList
-exit
 $TemplateFile="templates\azuredeploy.json"
 $TemplateParameterFile="templates\azuredeploy.parameters.json"
 $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
