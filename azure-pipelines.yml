@@ -15,7 +15,7 @@ pool:
 stages:
   - stage: Deploying_infrastructure
     jobs:
-      - job:
+      - job: ARM_Template_deploying
         steps:
           - task: AzurePowerShell@5
             name: Get_Template_URLs
@@ -28,8 +28,6 @@ stages:
             env:
               MAPPED_GITHUB_TOKEN: $(githubToken)
               TEMPLATE_DIR: "templates/artifacts"
-      - job: ARM_Template_deploying
-        steps:
           - task: AzurePowerShell@5
             name: PS_Deployment
             inputs:
