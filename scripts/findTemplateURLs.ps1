@@ -1,4 +1,5 @@
 param($token,$repoLink,$dir,$branch)
+dir
 $templateFiles=Get-ChildItem -Path artifacts -Name
 Write-Host "##[debug]List of templates to proceed: $templateFiles"
 
