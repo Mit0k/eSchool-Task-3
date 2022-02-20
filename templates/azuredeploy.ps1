@@ -31,7 +31,7 @@ $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
 
 Write-Host "##[debug]Deploying template"
 New-AzDeployment `
-    -DeploymentDebugLogLevel All -ErrorVariable notValid`
+    -DeploymentDebugLogLevel All -ErrorVariable notValid `
     -Name $deploymentName -Location $Location `
     -TemplateFile $TemplateFile -TemplateParameterFile $TemplateParameterFile `
     -prefix $prefix  -databasePassword $databasePassword `
