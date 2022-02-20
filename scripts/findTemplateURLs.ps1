@@ -9,7 +9,7 @@ $headers.Add("Authorization", "token $token")
 $headers.Add("Accept", "application/vnd.github.v3+json")
 
 Write-Host "##[debug]Obtain template links"
-$templateUrlList = []
+$templateUrlList = @()
 
 Foreach ($file in $templateFiles){
     $fullpath="https://api.github.com/repos/$owner/$repo/contents/$dir?ref=$branch"
