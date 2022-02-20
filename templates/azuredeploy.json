@@ -70,8 +70,8 @@
     "rg2": "[parameters('RgList')[1]]",
     "rg3": "[parameters('RgList')[2]]",
     "link1": "[parameters('UrlList')[0]]",
-    "link2": "[parameters('RgList')[1]]",
-    "link3": "[parameters('RgList')[2]]"
+    "link2": "[parameters('UrlList')[1]]",
+    "link3": "[parameters('UrlList')[2]]"
   },
   "resources": [
     {
