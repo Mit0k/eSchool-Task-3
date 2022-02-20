@@ -137,6 +137,9 @@
           },
           "alertScript": {
             "value": "[parameters('alertScript')]"
+          },
+          "webAppGroup": {
+            "value": "[variables('rg3')]"
           }
         }
       }
