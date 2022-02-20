@@ -40,7 +40,7 @@ if (!$notValid) {
 
 Write-Host "##[debug]Deploying template"
 New-AzDeployment `
-    -DeploymentDebugLogLevel All
+    -DeploymentDebugLogLevel All `
     -Name $deploymentName -Location $Location `
     -TemplateFile $TemplateFile -TemplateParameterFile $TemplateParameterFile `
     -prefix $prefix  -databasePassword $databasePassword `
