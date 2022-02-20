@@ -17,15 +17,12 @@ stages:
       - job: Uploading_templates
         steps:
           - task: AzurePowerShell@5
-            name: PS_Deployment
+            name: Create_storage
             inputs:
               azureSubscription: "AzureNew"
               ScriptType: "FilePath"
-              ScriptPath: "templates/azuredeploy.ps1"
-              ScriptArguments: -Location ${env:location} -prefix ${env:prefix} -slackURL $env:MAPPED_SLACK_URL
+              ScriptPath: "scripts/uploadToStorage.ps1"
               azurePowerShellVersion: "LatestVersion"
-            env:
-              MAPPED_SLACK_URL: $(slackURL)
 
       - job: ARM_Template_deploying
         steps:
