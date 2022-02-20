@@ -58,11 +58,11 @@
     },
     "RgList": {
       "type": "array",
-      "defaultValue": []
+      "defaultValue": [null, null, null]
     },
     "UrlList": {
       "type": "array",
-      "defaultValue": []
+      "defaultValue": [null, null, null]
     }
   },
   "variables": {
