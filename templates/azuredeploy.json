@@ -77,9 +77,6 @@
       "apiVersion": "2021-04-01",
       "resourceGroup": "[variables('rg1')]",
       "properties": {
-        "debugSetting": {
-          "detailLevel": "string"
-        },
         "mode": "Incremental",
         "templateLink": {
           "relativePath": "artifacts/common.json"
