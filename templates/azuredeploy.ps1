@@ -30,7 +30,7 @@ $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
 
 Write-Host "##[debug]Validating template"
 $notValid=Test-AzDeployment -ErrorVariable notValid -ErrorAction SilentlyContinue -TemplateFile $TemplateFile -TemplateParameterFile  $TemplateParameterFile -Location $Location 5>&1 
-if ($notValid) {
+if (!$notValid) {
     Write-Host $notValid.Code
     Write-Host $notValid.Message
     Write-Host $notValid.Details
