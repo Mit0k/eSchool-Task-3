@@ -16,7 +16,7 @@ Foreach ($filename in $templateFiles){
     Write-Host "##[debug]Obtaining $filename from $fullpath"
 
     $response = (Invoke-RestMethod $fullpath -Method 'GET' -Headers $headers -Body $body) 
-    $templateUrlList= $templateUrlList+($response.download_url)
+    $templateUrlList += ($response.download_url)
 }
 
 $l=$templateUrlList.Length

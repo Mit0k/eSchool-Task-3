@@ -1,5 +1,5 @@
 param($Location, $TemplateFile, $TemplateParameterFile, $prefix, $slackURL,$templateUrlList)
-Write-Host $templateUrlList
+Write-Host 
 $TemplateFile="templates\azuredeploy.json"
 $TemplateParameterFile="templates\azuredeploy.parameters.json"
 $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
@@ -8,13 +8,14 @@ $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
 if (!$prefix) {$prefix = 'armeschool'}
 Write-Host "##[debug]Getting resource group"
 
-$rgCommonName= "rg-"+$prefix+"-common-base-"+$Location
-$rgMetricsName="rg-"+$prefix+"-common-metrics-"+$Location
-$rgWebAppName= "rg-"+$prefix+"-APP-"+$Location
+$ResourceGroupNames = @()
+$ResourceGroupNames += "rg-"+$prefix+"-common-base-"+$Location
+$ResourceGroupNames +="rg-"+$prefix+"-common-metrics-"+$Location
+$ResourceGroupNames += "rg-"+$prefix+"-APP-"+$Location
 
-$ResourceGroupNames = $rgCommonName,$rgMetricsName,$rgWebAppName
 Write-Host "##[debug]$ResourceGroupNames"
 Foreach ($rg in $ResourceGroupNames){
+    
     Get-AzResourceGroup -Name $rg -ErrorVariable notPresent -ErrorAction silentlycontinue
     if ($notPresent) {
         New-AzResourceGroup -Name $rg -Location $Location
@@ -41,4 +42,5 @@ New-AzDeployment `
     -Name $deploymentName -Location $Location `
     -TemplateFile $TemplateFile -TemplateParameterFile $TemplateParameterFile `
     -prefix $prefix  -databasePassword $databasePassword `
-    -slackURL $slackURL -alertScript $alertScript
+    -slackURL $slackURL -alertScript $alertScript `
+    -RgList $ResourceGroupNames -UrlList $templateUrlList

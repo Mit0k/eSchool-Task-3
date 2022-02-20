@@ -55,12 +55,21 @@
     "dbPrivateIp": {
       "type": "string",
       "defaultValue": "4"
+    },
+    "RgList": {
+      "type": "array"
+    },
+    "UrlList": {
+      "type": "array"
     }
   },
   "variables": {
-    "rg1": "[format('rg-{0}-common-base-{1}',parameters('prefix'),parameters('location'))]",
-    "rg2": "[format('rg-{0}-common-metrics-{1}',parameters('prefix'),parameters('location'))]",
-    "rg3": "[format('rg-{0}-APP-{1}',parameters('prefix'),parameters('location'))]"
+    "rg1": "[parameters('RgList')[0]]",
+    "rg2": "[parameters('RgList')[0]]",
+    "rg3": "[parameters('RgList')[0]]",
+    "link1": "[parameters('UrlList')[0]]",
+    "link2": "[parameters('RgList')[0]]",
+    "link3": "[parameters('RgList')[0]]"
   },
   "resources": [
     {
@@ -72,7 +81,7 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[uri(deployment().properties.templateLink.uri,'common.json')]"
+          "uri": "[variables('link1')]"
         },
         "parameters": {
           "prefix": {
