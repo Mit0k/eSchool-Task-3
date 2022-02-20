@@ -1,6 +1,5 @@
 param($token,$repoLink,$dir,$branch)
-dir
-$templateFiles=Get-ChildItem -Path artifacts -Name
+$templateFiles=Get-ChildItem -Path $dir -Name
 Write-Host "##[debug]List of templates to proceed: $templateFiles"
 
 Write-Host "##[debug]Preparing REST method"
