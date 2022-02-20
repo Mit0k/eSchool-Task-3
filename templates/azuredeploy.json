@@ -38,7 +38,10 @@
       "type": "string",
       "metadata": {
         "description": "description"
-      }
+      },
+          "webAppGroup": {
+            "value": "[variables('rg3')]"
+          }
     },
     "vnetAddressPrefixes": {
       "type": "string",
