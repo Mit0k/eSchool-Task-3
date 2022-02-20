@@ -21,4 +21,4 @@ Foreach ($filename in $templateFiles){
 
 $l=$templateUrlList.Length
 Write-Host "##[debug]Returning $l template link(s)"
-Write-Host "##vso[task.setvariable variable=templateUrlList;isOutput=true]$templateUrlList"
+Write-Host "##vso[task.setvariable variable=templateUrlList]$templateUrlList"
