@@ -30,7 +30,7 @@ $DatabasePassword = ConvertTo-SecureString (Get-RandomPassword 8)  -AsPlainText 
 $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
 
 Write-Host "##[debug]Deploying template"
-New-AzDeployment `
+$errorMessage=New-AzDeployment `
     -DeploymentDebugLogLevel All -ErrorVariable notValid -ErrorAction SilentlyContinue `
     -Name $deploymentName -Location $Location `
     -TemplateFile $TemplateFile -TemplateParameterFile $TemplateParameterFile `
@@ -38,6 +38,7 @@ New-AzDeployment `
     -slackURL $slackURL -alertScript $alertScript `
     -RgList $ResourceGroupNames -UrlList $templateUrlList
 if ($notValid) {
+    Write-Host $errorMessage
     Write-Host $notValid
     Write-Host $notValid.Code
     Write-Host $notValid.Message
