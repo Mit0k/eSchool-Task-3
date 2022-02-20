@@ -12,7 +12,7 @@ Write-Host "##[debug]Obtain template links"
 $templateUrlList = @()
 
 Foreach ($filename in $templateFiles){
-    $fullpath="https://api.github.com/repos/$owner/$repo/contents/$dir/$filename/?ref=$branch"
+    $fullpath="https://api.github.com/repos/$owner/$repo/contents/$dir/$filename`?ref=$branch"
     Write-Host "##[debug]Obtaining $filename from $fullpath"
 
     $response = (Invoke-RestMethod $fullpath -Method 'GET' -Headers $headers -Body $body) 
