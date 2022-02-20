@@ -13,7 +13,7 @@ $templateUrlList = @()
 
 Foreach ($file in $templateFiles){
     $fullpath="https://api.github.com/repos/$owner/$repo/contents/$dir/$file?ref=$branch"
-    Write-Host "##[debug]Obtaining $fullpath"
+    Write-Host "##[debug]Obtaining $file from $fullpath"
 
     $response = (Invoke-RestMethod $fullpath -Method 'GET' -Headers $headers -Body $body) 
     $templateUrlList.Add($response.download_url)
