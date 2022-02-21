@@ -56,7 +56,7 @@ $errorMessage=New-AzDeployment `
     -Name $deploymentName -Location $Location `
     -prefix $prefix  -databasePassword $databasePassword `
     -slackURL $slackURL -alertScript $alertScript `
-    -RgList $ResourceGroupNames -KvObjectID $userObjectID `
+    -RgList $ResourceGroupNames -userObjectID $userObjectID `
     -ErrorVariable notValid -ErrorAction SilentlyContinue
 if ($notValid) {
     Write-Host "##[error][Template spec]::Deploying failed"
