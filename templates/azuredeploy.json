@@ -10,59 +10,40 @@
       "type": "string"
     },
     "databaseUsername": {
-      "type": "string",
-      "defaultValue": "mysqladmin"
+      "type": "string"
     },
     "databasePassword": {
       "type": "securestring"
     },
     "cpuThreshold": {
-      "type": "int",
-      "metadata": {
-        "description": "description"
-      },
-      "defaultValue": 75
+      "type": "int"
     },
     "minInstances": {
-      "type": "int",
-      "defaultValue": 1
+      "type": "int"
     },
     "maxInstances": {
-      "type": "int",
-      "defaultValue": 2
+      "type": "int"
     },
     "slackURL": {
       "type": "securestring"
     },
     "alertScript": {
-      "type": "string",
-      "metadata": {
-        "description": "description"
-      }
+      "type": "string"
     },
     "vnetAddressPrefixes": {
-      "type": "string",
-      "defaultValue": "10.2.0.0/16"
+      "type": "string"
     },
     "snetAddressPrefix": {
-      "type": "string",
-      "defaultValue": "10.2.0.0/24"
+      "type": "string"
     },
     "snetDBAddressPrefix": {
-      "type": "string",
-      "defaultValue": "10.2.1.0/24"
+      "type": "string"
     },
     "dbPrivateIp": {
-      "type": "string",
-      "defaultValue": "4"
+      "type": "string"
     },
     "RgList": {
-      "type": "array",
-      "defaultValue": [
-        "resourceGroupName1",
-        "resourceGroupName2",
-        "resourceGroupName2"
-      ]
+      "type": "array"
     }
   },
   "variables": {
@@ -114,9 +95,6 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "resourceGroup": "[variables('rg2')]",
-      //"dependsOn": [
-      //  "[format('/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}',subscription().subscriptionId,variables('rg1'),'Microsoft.Resources/deployments', 'deployCommonBase')]"
-      //      ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -149,9 +127,6 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "resourceGroup": "[variables('rg3')]",
-      //"dependsOn": [
-      //  "[format('/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}',subscription().subscriptionId,variables('rg2'),'Microsoft.Resources/deployments', 'deployCommonMetrics')]"
-      //],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
