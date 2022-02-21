@@ -239,11 +239,11 @@
               "properties": {
                 "accessPolicies": [
                   {
-                    "objectId": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full').properties.principalId]",
+                    "objectId": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.userAssignedIdentities.principalId]",
                     "permissions": {
                       "secrets": ["List", "Get", "Set"]
                     },
-                    "tenantId": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.userAssignedIdentities.properties.tenantId]"
+                    "tenantId": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.userAssignedIdentities.tenantId]"
                   }
                 ]
               }
