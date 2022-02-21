@@ -3,7 +3,7 @@
   "contentVersion": "1.0.0.0",
   "functions": [],
   "parameters": {
-    "KvObjectID": {
+    "userObjectID": {
       "type": "string"
     },
     "prefix": {
@@ -93,8 +93,8 @@
           "snetAddressPrefix": {
             "value": "[parameters('snetAddressPrefix')]"
           },
-          "KvObjectID": {
-            "value": "[parameters('KvObjectID')]"
+          "userObjectID": {
+            "value": "[parameters('userObjectID')]"
           }
         }
       }
