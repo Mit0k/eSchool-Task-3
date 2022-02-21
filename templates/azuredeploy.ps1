@@ -5,8 +5,8 @@ $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
 . "scripts\generatePass.ps1"
 
 if (!$prefix) {$prefix = 'armeschool'}
-$objectID=Get-AzADUser
-$objectID=$objectID.objectID
+$objectID= Get-AzContext
+$objectID=$objectID.Account.Id
 $objectID = ConvertTo-SecureString $objectID  -AsPlainText -Force
 Write-Host "##[debug]Getting resource group"
 
@@ -53,7 +53,7 @@ $errorMessage=New-AzDeployment `
     -Name $deploymentName -Location $Location `
     -prefix $prefix  -databasePassword $databasePassword `
     -slackURL $slackURL -alertScript $alertScript `
-    -RgList $ResourceGroupNames -KvObjectID $objectID`
+    -RgList $ResourceGroupNames -KvObjectID $objectID `
     -ErrorVariable notValobjectID -ErrorAction SilentlyContinue
 if ($notValobjectID) {
     Write-Host "##[error][Template spec]::Deploying failed"
