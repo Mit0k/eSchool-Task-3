@@ -3,7 +3,7 @@ $TemplateFile="templates\azuredeploy.json"
 $TemplateParameterFile="templates\azuredeploy.parameters.json"
 $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
 . "scripts\generatePass.ps1"
-$objectID= Get-AzContext
+$objectID= Get-AzContext -Scope CurrentUser
 $objectID=$objectID.Account.Id
 $objectID = ConvertTo-SecureString $objectID  -AsPlainText -Force
 if (!$prefix) {$prefix = 'armeschool'}
