@@ -4,7 +4,7 @@
   "functions": [],
   "parameters": {
     "KvObjectID": {
-      "type": "securestring"
+      "type": "string"
     },
     "prefix": {
       "type": "string"

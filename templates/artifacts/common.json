@@ -52,7 +52,7 @@
       "defaultValue": "10.2.0.0/24"
     },
     "KvObjectID": {
-      "type": "securestring"
+      "type": "string"
     }
   },
   "variables": {
