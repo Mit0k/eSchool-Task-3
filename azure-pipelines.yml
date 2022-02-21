@@ -1,6 +1,6 @@
 variables:
   location: "eastus"
-  prefix: "half"
+  prefix: "correct"
 
   PROJECT: $(System.TeamProject)
   ORG: $(System.TeamFoundationCollectionUri)

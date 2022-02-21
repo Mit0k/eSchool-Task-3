@@ -100,38 +100,6 @@
       }
     },
     {
-      "name": "[variables('deploymentName2')]",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2021-04-01",
-      "resourceGroup": "[variables('rg2')]",
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "relativePath": "artifacts/metrics.json"
-        },
-        "parameters": {
-          "prefix": {
-            "value": "[parameters('prefix')]"
-          },
-          "location": {
-            "value": "[parameters('location')]"
-          },
-          "cpuThreshold": {
-            "value": "[parameters('cpuThreshold')]"
-          },
-          "slackURL": {
-            "value": "[parameters('slackURL')]"
-          },
-          "alertScript": {
-            "value": "[parameters('alertScript')]"
-          },
-          "webAppGroup": {
-            "value": "[variables('rg3')]"
-          }
-        }
-      }
-    },
-    {
       "name": "[variables('deploymentName3')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
@@ -165,6 +133,41 @@
           },
           "maxInstances": {
             "value": "[parameters('maxInstances')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "[variables('deploymentName2')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "resourceGroup": "[variables('rg2')]",
+      "dependsOn": [
+        "[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('rg2'),variables('deploymentName2'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "relativePath": "artifacts/metrics.json"
+        },
+        "parameters": {
+          "prefix": {
+            "value": "[parameters('prefix')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "cpuThreshold": {
+            "value": "[parameters('cpuThreshold')]"
+          },
+          "slackURL": {
+            "value": "[parameters('slackURL')]"
+          },
+          "alertScript": {
+            "value": "[parameters('alertScript')]"
+          },
+          "webAppGroup": {
+            "value": "[variables('rg3')]"
           }
         }
       }
