@@ -20,7 +20,7 @@ public static async Task<IActionResult> Run(HttpRequest req, ILogger log)
     string metricName = data?.data?.context?.condition?.allOf?[0].metricName;
     string threshold = data?.data?.context?.condition?.allOf?[0].metricValue;
 
-    string jsonText = $"{{\"text\": \"*\0x2757ALERT\0x2757*\n*FROM*: {resourceName}:\n`{metricName}` is over {threshold}!!!\n<{link}|*Check it out*>\"}}";
+    string jsonText = $"{{\"text\": \"*ALERT*\n*FROM*: {resourceName}:\n`{metricName}` is over {threshold}!!!\n<{link}|*Check it out*>\"}}";
     string sendToUrl = Environment.GetEnvironmentVariable("SLACK_URL");
 
     HttpRequestMessage slackMessage = new HttpRequestMessage(HttpMethod.Post, sendToUrl);
