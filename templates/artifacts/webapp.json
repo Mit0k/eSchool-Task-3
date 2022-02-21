@@ -104,7 +104,7 @@
           },
           {
             "name": "kvtest",
-            "value": "[concat('@Microsoft.KeyVault(SecretUri=', reference(resourceId(parameters('commonRG'),'Microsoft.KeyVault/vaults/secrets','kv-secrets-eastus','slackURL').secretUriWithVersion, ')'))]"
+            "value": "[format('@Microsoft.KeyVault(SecretUri={0})', reference(resourceId(parameters('commonRG'),'Microsoft.KeyVault/vaults/secrets','kv-secrets-eastus','slackURL')).secretUriWithVersion)]"
           }
         ]
       }
