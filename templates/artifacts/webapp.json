@@ -44,7 +44,8 @@
     "increaseThreshold": 50,
     "decreaseThreshold": 35,
     "kvName": "[format('kv-{0}-{1}',parameters('prefix'),parameters('location'))]",
-    "dbPassName": "[format('{0}Pass',variables('dbServerName'))]"
+    "dbPassName": "[format('{0}Pass',variables('dbServerName'))]",
+    "currentRG": "[resourceGroup().name]"
   },
   "resources": [
     {
@@ -212,19 +213,35 @@
       }
     },
     {
-      "type": "Microsoft.KeyVault/vaults/accessPolicies",
-      "apiVersion": "2021-11-01-preview",
-      "name": "[concat(variables('kvName'), '/add')]",
+      "name": "SetKVAccessPolicy",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "subscriptionId": "[subscription().subscriptionId]",
+      "resourceGroup": "[parameters('commonRG')]",
       "properties": {
-        "accessPolicies": [
-          {
-            "objectId": "[reference(resourceId('Microsoft.Web/sites', variables('webAppName')), '2018-02-01', 'Full').identity.principalId]",
-            "permissions": {
-              "secrets": ["List", "Get", "Set"]
-            },
-            "tenantId": "[reference(resourceId('Microsoft.Web/sites', variables('webAppName')), '2018-02-01', 'Full').identity.tenantId]"
-          }
-        ]
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "type": "Microsoft.KeyVault/vaults/accessPolicies",
+              "name": "[concat(variables('kvName'), '/add')]",
+              "apiVersion": "2021-11-01-preview",
+              "properties": {
+                "accessPolicies": [
+                  {
+                    "objectId": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.principalId]",
+                    "permissions": {
+                      "secrets": ["List", "Get", "Set"]
+                    },
+                    "tenantId": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.tenantId]"
+                  }
+                ]
+              }
+            }
+          ]
+        }
       }
     }
   ],
