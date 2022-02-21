@@ -44,7 +44,7 @@
     "increaseThreshold": 50,
     "decreaseThreshold": 35,
     "kvName": "[format('kv-{0}-{1}',parameters('prefix'),parameters('location'))]",
-    "dbPassName": "format('{0}Pass',variables('dbServerName'))"
+    "dbPassName": "[format('{0}Pass',variables('dbServerName'))]"
   },
   "resources": [
     {
