@@ -84,31 +84,25 @@
         "managedPipelineMode": "Integrated",
         "loadBalancing": "LeastRequests",
         "vnetName": "[variables('vnetName')]",
-        "vnetRouteAllEnabled": true,
-        "appSettings": [
-          {
-            "name": "DATASOURCE_URL",
-            "value": "[format('jdbc:mysql://{0}.mysql.database.azure.com:3306/{1}?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=true&enabledTLSProtocols=TLSv1.2',variables('dbServerName'),variables('projectDatabaseName'))]"
-          },
-          {
-            "name": "DATASOURCE_USERNAME",
-            "value": "[format('{0}',parameters('databaseUsername'))]"
-          },
-          {
-            "name": "DATASOURCE_PASSWORD",
-            "value": "[parameters('databasePassword')]"
-          },
-          {
-            "name": "ESCHOOL_APP_HOST",
-            "value": "[format('{0}.azurewebsites.net',variables('webAppName'))]"
-          },
-          {
-            "name": "kvtest",
-            //"value": "[format(reference(resourceId(parameters('commonRG'),'Microsoft.KeyVault/vaults/secrets',variables('kvName'),variables('dbPassName')), '2019-09-01').secretUriWithVersion)]"
-            "value": "[concat('@Microsoft.KeyVault(SecretUri=',format(reference(resourceId(parameters('commonRG'),'Microsoft.KeyVault/vaults/secrets',variables('kvName'),variables('dbPassName')), '2019-09-01').secretUriWithVersion,')'))]"
-          }
-        ]
+        "vnetRouteAllEnabled": true
       }
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2021-02-01",
+      "name": "[format('{0}/{1}', variables('webAppName'), 'appsettings')]",
+      "properties": {
+        "kvtest": "[concat('@Microsoft.KeyVault(SecretUri=',format(reference(resourceId(parameters('commonRG'),'Microsoft.KeyVault/vaults/secrets',variables('kvName'),variables('dbPassName')), '2019-09-01').secretUriWithVersion,')'))]",
+        "hello": "1",
+        "ESCHOOL_APP_HOST": "[format('{0}.azurewebsites.net',variables('webAppName'))]",
+        "DATASOURCE_PASSWORD": "[parameters('databasePassword')]",
+        "DATASOURCE_USERNAME": "[format('{0}',parameters('databaseUsername'))]",
+        "DATASOURCE_URL": "[format('jdbc:mysql://{0}.mysql.database.azure.com:3306/{1}?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=true&enabledTLSProtocols=TLSv1.2',variables('dbServerName'),variables('projectDatabaseName'))]"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('webAppName'))]",
+        "[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,parameters('commonRG'),'SetKVAccessPolicy')]"
+      ]
     },
     {
       "type": "Microsoft.Web/sites",
@@ -218,6 +212,9 @@
       "apiVersion": "2021-04-01",
       "subscriptionId": "[subscription().subscriptionId]",
       "resourceGroup": "[parameters('commonRG')]",
+      "dependsOn": [
+        "[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Web/sites/{2}',subscription().subscriptionId,variables('currentRG'),variables('webAppName'))]"
+      ],
       "properties": {
         "mode": "Incremental",
         "template": {
