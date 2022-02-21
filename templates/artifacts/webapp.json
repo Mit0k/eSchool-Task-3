@@ -44,7 +44,9 @@
     "increaseThreshold": 50,
     "decreaseThreshold": 35,
     "kvName": "[format('kv-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "kvResourceId": "[resourceId(parameters('commonRG'),'Microsoft.KeyVault/vaults/secrets',variables('kvName'),variables('dbPassName'))]",
     "dbPassName": "[format('{0}Pass',variables('dbServerName'))]",
+    "managedIdentityName": "[format('mi-{0}-{1}',parameters('prefix'),parameters('location'))]",
     "currentRG": "[resourceGroup().name]"
   },
   "resources": [
@@ -92,8 +94,8 @@
       "apiVersion": "2021-02-01",
       "name": "[format('{0}/{1}', variables('webAppName'), 'appsettings')]",
       "properties": {
-        "kvtest": "[concat('@Microsoft.KeyVault(SecretUri=',format(reference(resourceId(parameters('commonRG'),'Microsoft.KeyVault/vaults/secrets',variables('kvName'),variables('dbPassName')), '2019-09-01').secretUriWithVersion,')'))]",
-        "hello": "1",
+        "kvtest": "[format('@Microsoft.KeyVault(SecretUri={0})',reference(variables('kvResourceId'), '2019-09-01').secretUriWithVersion)]",
+        "kvTest2": "",
         "ESCHOOL_APP_HOST": "[format('{0}.azurewebsites.net',variables('webAppName'))]",
         "DATASOURCE_PASSWORD": "[parameters('databasePassword')]",
         "DATASOURCE_USERNAME": "[format('{0}',parameters('databaseUsername'))]",
@@ -105,6 +107,12 @@
       ]
     },
     {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "name": "[variables('managedIdentityName')]",
+      "apiVersion": "2018-11-30",
+      "location": "[resourceGroup().location]"
+    },
+    {
       "type": "Microsoft.Web/sites",
       "apiVersion": "2021-02-01",
       "name": "[variables('webAppName')]",
@@ -114,7 +122,10 @@
       ],
       "kind": "app,linux",
       "identity": {
-        "type": "SystemAssigned"
+        "type": "userAssigned",
+        "userAssignedIdentities": {
+          "[resourceID('Microsoft.ManagedIdentity/userAssignedIdentities/',variables('managedIdentityName'))]": {}
+        }
       },
       "properties": {
         "enabled": true,
