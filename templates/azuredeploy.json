@@ -137,7 +137,7 @@
       "apiVersion": "2021-04-01",
       "resourceGroup": "[variables('rg3')]",
       "dependsOn": [
-        "[resourceId(variables('rg1'),'Microsoft.Resources/deployment',variables('deploymentName1'))]"
+        "[resourceId('Microsoft.Resources/deployment',variables('deploymentName1'))]"
       ],
       "properties": {
         "mode": "Incremental",
