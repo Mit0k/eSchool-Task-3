@@ -203,20 +203,18 @@
           "name": "standard",
           "family": "A"
         }
-      },
-      "resources": [
-        {
-          "type": "secrets",
-          "name": "[format('{0} pass',variables('dbServerName'))]",
-          "apiVersion": "2016-10-01",
-          "dependsOn": [
-            "[resourceId('Microsoft.KeyVault/vaults', variables('kvName'))]"
-          ],
-          "properties": {
-            "value": "[parameters('databasePassword')]"
-          }
-        }
-      ]
+      }
+    },
+    {
+      "name": "[format('{0}/{1}',variables('kvName'),format('{0}Pass',variables('dbServerName')))]",
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2019-09-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('kvName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('databasePassword')]"
+      }
     }
   ],
   "outputs": {}
