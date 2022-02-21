@@ -138,7 +138,7 @@
       "resourceGroup": "[variables('rg3')]",
       "dependsOn": [
         //"[resourceId('Microsoft.Resources/deployment',variables('deploymentName1'))]"
-        "[format('/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('rg1'),variables('deploymentName1'))]"
+        "[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('rg1'),variables('deploymentName1'))]"
       ],
       "properties": {
         "mode": "Incremental",
