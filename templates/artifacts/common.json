@@ -50,6 +50,9 @@
     "snetAddressPrefix": {
       "type": "string",
       "defaultValue": "10.2.0.0/24"
+    },
+    "KvObjectID": {
+      "type": "securestring"
     }
   },
   "variables": {
@@ -189,7 +192,7 @@
         "tenantId": "[subscription().tenantId]",
         "accessPolicies": [
           {
-            //"objectId": "",
+            "objectId": "[parameters('KvObjectID')]",
             "tenantId": "[subscription().tenantId]",
             "permissions": {
               "secrets": ["List", "Get", "Set"]

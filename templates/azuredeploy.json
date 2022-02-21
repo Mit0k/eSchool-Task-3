@@ -3,6 +3,9 @@
   "contentVersion": "1.0.0.0",
   "functions": [],
   "parameters": {
+    "KvObjectID": {
+      "type": "securestring"
+    },
     "prefix": {
       "type": "string"
     },
@@ -86,6 +89,9 @@
           },
           "snetAddressPrefix": {
             "value": "[parameters('snetAddressPrefix')]"
+          },
+          "KvObjectID": {
+            "value": "[parameters('KvObjectID')]"
           }
         }
       }

@@ -47,6 +47,9 @@
     },
     "cpuThreshold": {
       "value": 75
+    },
+    "KvObjectID": {
+      "value": ""
     }
   }
 }
