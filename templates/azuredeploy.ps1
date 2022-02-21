@@ -4,6 +4,7 @@ $TemplateParameterFile="templates\azuredeploy.parameters.json"
 $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
 . "scripts\generatePass.ps1"
 $objectID= Get-AzContext 
+Write-Host "##[debug]Gag"
 $objectID=$objectID.Account.Id
 $objectID = ConvertTo-SecureString $objectID  -AsPlainText -Force
 if (!$prefix) {$prefix = 'armeschool'}
