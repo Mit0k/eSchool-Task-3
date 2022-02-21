@@ -1,22 +1,31 @@
 param($Location, $prefix, $slackURL)
+
+Write-Host "##[section]Preparations"
+Write-Host "##[debug]Loading main template files"
+
 $TemplateFile="templates\azuredeploy.json"
 $TemplateParameterFile="templates\azuredeploy.parameters.json"
 $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
 . "scripts\generatePass.ps1"
+
+Write-Host "##[debug]Setting variables"
+if (!$prefix) {$prefix = 'armeschool'}
 $objectID= Get-AzContext 
 $objectID=$objectID.Account.Id
-if (!$prefix) {$prefix = 'armeschool'}
-$id=Get-AzADUser
-$id=$id.Id
-$id = ConvertTo-SecureString $id  -AsPlainText -Force
-Write-Host "##[debug]Getting resource group"
 
+$today=Get-Date -Format "MM-dd-yyyy-HH-mm"
+$deploymentName="WebAppDeploy"+"${today}"
+
+$DatabasePassword = ConvertTo-SecureString (Get-RandomPassword 8)  -AsPlainText -Force
+$slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
+
+Write-Host "##[debug]Getting resource group"
 $ResourceGroupNames = @()
 $ResourceGroupNames += "rg-"+$prefix+"-common-base-"+$Location
 $ResourceGroupNames +="rg-"+$prefix+"-common-metrics-"+$Location
 $ResourceGroupNames += "rg-"+$prefix+"-APP-"+$Location
 
-Write-Host "##[debug]$ResourceGroupNames"
+Write-Host "##[debug]Resource groups to deploy::$ResourceGroupNames"
 Foreach ($rg in $ResourceGroupNames){
     
     Get-AzResourceGroup -Name $rg -ErrorVariable notPresent -ErrorAction silentlycontinue
@@ -25,12 +34,7 @@ Foreach ($rg in $ResourceGroupNames){
     }
 }
 
-$today=Get-Date -Format "MM-dd-yyyy-HH-mm"
-$deploymentName="WebAppDeploy"+"${today}"
-
-$DatabasePassword = ConvertTo-SecureString (Get-RandomPassword 8)  -AsPlainText -Force
-$slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
-
+Write-Host "##[endgroup]"
 Write-Host "##[section]Deploying template"
 Write-Host "##[debug][Template spec]::Create"
 New-AzTemplateSpec `
