@@ -239,7 +239,7 @@
               "properties": {
                 "accessPolicies": [
                   {
-                    "objectId": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.userAssignedIdentities.properties.principalId]",
+                    "objectId": "[reference(resourceId(variables('currentRG'),'ManagedIdentity/userAssignedIdentities', variables('webAppName')), '2018-11-30', 'Full').principalId]",
                     "permissions": {
                       "secrets": ["List", "Get", "Set"]
                     },
