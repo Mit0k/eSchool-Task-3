@@ -75,9 +75,6 @@
       "dependsOn": [
         "[resourceId('Microsoft.Web/sites', variables('webAppName'))]"
       ],
-      "identity": {
-        "type": "SystemAssigned"
-      },
       "properties": {
         "numberOfWorkers": 1,
         "linuxFxVersion": "JAVA|8-jre8",
@@ -121,6 +118,9 @@
         "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]"
       ],
       "kind": "app,linux",
+      "identity": {
+        "type": "SystemAssigned"
+      },
       "properties": {
         "enabled": true,
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('planName'))]",
@@ -209,6 +209,22 @@
       "properties": {
         "vnetResourceId": "[resourceId(parameters('commonRG'),'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('snetName'))]",
         "isSwift": true
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/accessPolicies",
+      "apiVersion": "2021-11-01-preview",
+      "name": "[concat(variables('kvName'), '/add')]",
+      "properties": {
+        "accessPolicies": [
+          {
+            "objectId": "[reference(resourceId('Microsoft.Web/sites', variables('webAppName')), '2018-02-01', 'Full').identity.principalId]",
+            "permissions": {
+              "secrets": ["List", "Get", "Set"]
+            },
+            "tenantId": "[reference(resourceId('Microsoft.Web/sites', variables('webAppName')), '2018-02-01', 'Full').identity.tenantId]"
+          }
+        ]
       }
     }
   ],

@@ -1,4 +1,4 @@
-param($Location, $prefix, $slackURL)
+param($Location, $prefix, $slackURL, $userObjectID)
 
 Write-Host "##[section]Preparations"
 Write-Host "##[debug]Loading main template files"
@@ -10,8 +10,6 @@ $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
 
 Write-Host "##[debug]Setting variables"
 if (!$prefix) {$prefix = 'armeschool'}
-$objectID= Get-AzContext 
-$objectID=$objectID.Account.Id
 
 $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
 $deploymentName="WebAppDeploy"+"${today}"
@@ -58,7 +56,7 @@ $errorMessage=New-AzDeployment `
     -Name $deploymentName -Location $Location `
     -prefix $prefix  -databasePassword $databasePassword `
     -slackURL $slackURL -alertScript $alertScript `
-    -RgList $ResourceGroupNames -KvObjectID $objectID `
+    -RgList $ResourceGroupNames -KvObjectID $userObjectID `
     -ErrorVariable notValid -ErrorAction SilentlyContinue
 if ($notValid) {
     Write-Host "##[error][Template spec]::Deploying failed"

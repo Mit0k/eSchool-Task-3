@@ -1,6 +1,6 @@
 variables:
   location: "eastus"
-  prefix: "spectdep"
+  prefix: "spectmet"
 
   PROJECT: $(System.TeamProject)
   ORG: $(System.TeamFoundationCollectionUri)
@@ -23,8 +23,9 @@ stages:
               azureSubscription: "AzureNew"
               ScriptType: "FilePath"
               ScriptPath: "templates/azuredeploy.ps1"
-              ScriptArguments: -Location ${env:location} -prefix ${env:prefix} -slackURL $env:MAPPED_SLACK_URL -templateUrlList ${env:templateUrlList}
+              ScriptArguments: -Location ${env:location} -prefix ${env:prefix} -slackURL $env:MAPPED_SLACK_URL -userObjectID $env:MAPPED_USER_OBJECT_ID -templateUrlList ${env:templateUrlList}
               azurePowerShellVersion: "LatestVersion"
             env:
               MAPPED_SLACK_URL: $(slackURL)
+              MAPPED_USER_OBJECT_ID: $(userObjectID)
               templateUrlList: $(Get_Template_URLs.templateUrlList)

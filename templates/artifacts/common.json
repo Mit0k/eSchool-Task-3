@@ -51,7 +51,10 @@
       "type": "string",
       "defaultValue": "10.2.0.0/24"
     },
-    "KvObjectID": {
+    "appObjectID": {
+      "type": "string"
+    },
+    "userObjectID": {
       "type": "string"
     }
   },
@@ -192,7 +195,7 @@
         "tenantId": "[subscription().tenantId]",
         "accessPolicies": [
           {
-            "objectId": "[parameters('KvObjectID')]",
+            "objectId": "[parameters('userObjectID')]",
             "tenantId": "[subscription().tenantId]",
             "permissions": {
               "secrets": ["List", "Get", "Set"]
