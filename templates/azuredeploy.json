@@ -52,11 +52,14 @@
   "variables": {
     "rg1": "[parameters('RgList')[0]]",
     "rg2": "[parameters('RgList')[1]]",
-    "rg3": "[parameters('RgList')[2]]"
+    "rg3": "[parameters('RgList')[2]]",
+    "deploymentName1": "deployCommonBase",
+    "deploymentName2": "deployCommonMetrics",
+    "deploymentName3": "deployWebApp"
   },
   "resources": [
     {
-      "name": "deployCommonBase",
+      "name": "[variables('deploymentName1')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "resourceGroup": "[variables('rg1')]",
@@ -97,7 +100,7 @@
       }
     },
     {
-      "name": "deployCommonMetrics",
+      "name": "[variables('deploymentName2')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "resourceGroup": "[variables('rg2')]",
@@ -129,10 +132,13 @@
       }
     },
     {
-      "name": "deployWebApp",
+      "name": "[variables('deploymentName3')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "resourceGroup": "[variables('rg3')]",
+      "dependsOn": [
+        "[resourceId(variables('rg1'),'Microsoft.Resources/deployment',variables('deploymentName1'))]"
+      ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
