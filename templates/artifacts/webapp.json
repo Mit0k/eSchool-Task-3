@@ -237,9 +237,17 @@
               "type": "object",
               "value": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.userAssignedIdentities]"
             },
-            "output1": {
+            "manIdent": {
               "type": "object",
               "value": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full')]"
+            },
+            "tenant": {
+              "type": "object",
+              "value": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full').properties.tenantId]"
+            },
+            "object": {
+              "type": "object",
+              "value": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full').properties.principalId]"
             }
           }
         }
