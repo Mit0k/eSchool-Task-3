@@ -231,24 +231,13 @@
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
           "contentVersion": "1.0.0.0",
-          "resources": [
-            {
-              "type": "Microsoft.KeyVault/vaults/accessPolicies",
-              "name": "[concat(variables('kvName'), '/add')]",
-              "apiVersion": "2021-11-01-preview",
-              "properties": {
-                "accessPolicies": [
-                  {
-                    "objectId": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.userAssignedIdentities.principalId]",
-                    "permissions": {
-                      "secrets": ["List", "Get", "Set"]
-                    },
-                    "tenantId": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.userAssignedIdentities.tenantId]"
-                  }
-                ]
-              }
+          "resources": [],
+          "outputs": {
+            "output1": {
+              "type": "string",
+              "value": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.userAssignedIdentities]"
             }
-          ]
+          }
         }
       }
     }
