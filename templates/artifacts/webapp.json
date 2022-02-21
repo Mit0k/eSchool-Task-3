@@ -106,7 +106,8 @@
           },
           {
             "name": "kvtest",
-            "value": "[format(reference(resourceId(parameters('commonRG'),'Microsoft.KeyVault/vaults/secrets',variables('kvName'),variables('dbPassName')), '2019-09-01').secretUriWithVersion)]"
+            //"value": "[format(reference(resourceId(parameters('commonRG'),'Microsoft.KeyVault/vaults/secrets',variables('kvName'),variables('dbPassName')), '2019-09-01').secretUriWithVersion)]"
+            "value": "[concat('@Microsoft.KeyVault(SecretUri=',format(reference(resourceId(parameters('commonRG'),'Microsoft.KeyVault/vaults/secrets',variables('kvName'),variables('dbPassName')), '2019-09-01').secretUriWithVersion,')'))]"
           }
         ]
       }

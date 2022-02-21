@@ -137,8 +137,7 @@
       "apiVersion": "2021-04-01",
       "resourceGroup": "[variables('rg3')]",
       "dependsOn": [
-        "[resourceId(subscription().subscriptionId,variables('rg1'),'Microsoft.Resources/deployment',variables('deploymentName1'))]"
-        //"[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('rg1'),variables('deploymentName1'))]"
+        "[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('rg1'),variables('deploymentName1'))]"
       ],
       "properties": {
         "mode": "Incremental",
