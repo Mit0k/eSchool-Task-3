@@ -1,6 +1,6 @@
 variables:
   location: "eastus"
-  prefix: "spectest"
+  prefix: "spectwo"
 
   PROJECT: $(System.TeamProject)
   ORG: $(System.TeamFoundationCollectionUri)
