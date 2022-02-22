@@ -231,7 +231,24 @@
         "template": {
           "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
           "contentVersion": "1.0.0.0",
-          "resources": [],
+          "resources": [
+            {
+              "type": "Microsoft.KeyVault/vaults/accessPolicies",
+              "name": "[concat(variables('kvName'), '/add')]",
+              "apiVersion": "2021-11-01-preview",
+              "properties": {
+                "accessPolicies": [
+                  {
+                    "objectId": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full').properties.principalId]",
+                    "permissions": {
+                      "secrets": ["List", "Get", "Set"]
+                    },
+                    "tenantId": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full').properties.tenantId]"
+                  }
+                ]
+              }
+            }
+          ],
           "outputs": {
             "webIdent": {
               "type": "object",
@@ -240,14 +257,6 @@
             "manIdent": {
               "type": "object",
               "value": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full')]"
-            },
-            "object": {
-              "type": "string",
-              "value": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full').properties.principalId]"
-            },
-            "tenant": {
-              "type": "string",
-              "value": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full').properties.tenantId]"
             }
           }
         }
