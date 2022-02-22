@@ -241,13 +241,13 @@
               "type": "object",
               "value": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full')]"
             },
-            "tenant": {
-              "type": "object",
-              "value": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full').properties.tenantId]"
-            },
             "object": {
               "type": "object",
               "value": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full').properties.principalId]"
+            },
+            "tenant": {
+              "type": "string",
+              "value": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full').properties.tenantId]"
             }
           }
         }
