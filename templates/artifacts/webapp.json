@@ -242,7 +242,7 @@
               "value": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full')]"
             },
             "object": {
-              "type": "object",
+              "type": "string",
               "value": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full').properties.principalId]"
             },
             "tenant": {
