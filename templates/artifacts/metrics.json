@@ -214,7 +214,6 @@
             {
               "threshold": "[parameters('cpuThreshold')]",
               "name": "Metric1",
-              "metricNamespace": "Microsoft.Web/sites",
               "metricName": "Percentage CPU",
               "operator": "GreaterThan",
               "timeAggregation": "Average",
