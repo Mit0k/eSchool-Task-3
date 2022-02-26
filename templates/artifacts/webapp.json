@@ -234,12 +234,7 @@
               }
             }
           ],
-          "outputs": {
-            "webIdent": {
-              "type": "object",
-              "value": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.userAssignedIdentities]"
-            }
-          }
+          "outputs": {}
         }
       }
     }
