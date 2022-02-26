@@ -95,6 +95,9 @@
           },
           "userObjectID": {
             "value": "[parameters('userObjectID')]"
+          },
+          "slackURL": {
+            "value": "[parameters('slackURL')]"
           }
         }
       }
@@ -148,6 +151,9 @@
           "relativePath": "artifacts/metrics.json"
         },
         "parameters": {
+          "commonRG": {
+            "value": "[variables('rg1')]"
+          },
           "prefix": {
             "value": "[parameters('prefix')]"
           },
@@ -156,9 +162,6 @@
           },
           "cpuThreshold": {
             "value": "[parameters('cpuThreshold')]"
-          },
-          "slackURL": {
-            "value": "[parameters('slackURL')]"
           },
           "alertScript": {
             "value": "[parameters('alertScript')]"
