@@ -13,9 +13,6 @@
       "type": "string",
       "defaultValue": "mysqladmin"
     },
-    "databasePassword": {
-      "type": "securestring"
-    },
     "minInstances": {
       "type": "int"
     },
@@ -46,7 +43,6 @@
     "kvName": "[format('kv-{0}-{1}',parameters('prefix'),parameters('location'))]",
     "kvResourceId": "[resourceId(parameters('commonRG'),'Microsoft.KeyVault/vaults/secrets',variables('kvName'),variables('dbPassName'))]",
     "dbPassName": "[format('{0}Pass',variables('dbServerName'))]",
-    "managedIdentityName": "[format('mi-{0}-{1}',parameters('prefix'),parameters('location'))]",
     "currentRG": "[resourceGroup().name]"
   },
   "resources": [
@@ -93,24 +89,16 @@
       "type": "Microsoft.Web/sites/config",
       "apiVersion": "2021-02-01",
       "name": "[format('{0}/{1}', variables('webAppName'), 'appsettings')]",
-      "properties": {
-        "kvtest": "[format('@Microsoft.KeyVault(SecretUri={0})',reference(variables('kvResourceId'), '2019-09-01').secretUriWithVersion)]",
-        "kvTest2": "",
-        "ESCHOOL_APP_HOST": "[format('{0}.azurewebsites.net',variables('webAppName'))]",
-        "DATASOURCE_PASSWORD": "[parameters('databasePassword')]",
-        "DATASOURCE_USERNAME": "[format('{0}',parameters('databaseUsername'))]",
-        "DATASOURCE_URL": "[format('jdbc:mysql://{0}.mysql.database.azure.com:3306/{1}?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=true&enabledTLSProtocols=TLSv1.2',variables('dbServerName'),variables('projectDatabaseName'))]"
-      },
       "dependsOn": [
         "[resourceId('Microsoft.Web/sites', variables('webAppName'))]",
         "[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,parameters('commonRG'),'SetKVAccessPolicy')]"
-      ]
-    },
-    {
-      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-      "name": "[variables('managedIdentityName')]",
-      "apiVersion": "2018-11-30",
-      "location": "[resourceGroup().location]"
+      ],
+      "properties": {
+        "ESCHOOL_APP_HOST": "[format('{0}.azurewebsites.net',variables('webAppName'))]",
+        "DATASOURCE_PASSWORD": "[format('@Microsoft.KeyVault(SecretUri={0})',reference(variables('kvResourceId'), '2019-09-01').secretUriWithVersion)]",
+        "DATASOURCE_USERNAME": "[format('{0}',parameters('databaseUsername'))]",
+        "DATASOURCE_URL": "[format('jdbc:mysql://{0}.mysql.database.azure.com:3306/{1}?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=true&enabledTLSProtocols=TLSv1.2',variables('dbServerName'),variables('projectDatabaseName'))]"
+      }
     },
     {
       "type": "Microsoft.Web/sites",
@@ -122,10 +110,7 @@
       ],
       "kind": "app,linux",
       "identity": {
-        "type": "userAssigned",
-        "userAssignedIdentities": {
-          "[resourceID('Microsoft.ManagedIdentity/userAssignedIdentities/',variables('managedIdentityName'))]": {}
-        }
+        "type": "SystemAssigned"
       },
       "properties": {
         "enabled": true,
@@ -239,11 +224,11 @@
               "properties": {
                 "accessPolicies": [
                   {
-                    "objectId": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full').properties.principalId]",
+                    "objectId": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.principalId]",
                     "permissions": {
                       "secrets": ["List", "Get", "Set"]
                     },
-                    "tenantId": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full').properties.tenantId]"
+                    "tenantId": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.tenantId]"
                   }
                 ]
               }
@@ -253,10 +238,6 @@
             "webIdent": {
               "type": "object",
               "value": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.userAssignedIdentities]"
-            },
-            "manIdent": {
-              "type": "object",
-              "value": "[reference(resourceId(variables('currentRG'),'Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2018-11-30', 'Full')]"
             }
           }
         }
