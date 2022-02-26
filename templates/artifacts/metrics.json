@@ -224,7 +224,7 @@
           "odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
         },
         "autoMitigate": true,
-        "targetResourceType": "Microsoft.Web/site",
+        "targetResourceType": "Microsoft.Web/sites",
         "actions": [
           {
             "actionGroupId": "[resourceId('Microsoft.insights/actionGroups', variables('actionGroupsName'))]"
