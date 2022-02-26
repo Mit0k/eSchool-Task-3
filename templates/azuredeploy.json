@@ -125,9 +125,6 @@
           "databaseUsername": {
             "value": "[parameters('databaseUsername')]"
           },
-          "databasePassword": {
-            "value": "[parameters('databasePassword')]"
-          },
           "minInstances": {
             "value": "[parameters('minInstances')]"
           },
