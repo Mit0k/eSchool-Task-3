@@ -1,6 +1,6 @@
 variables:
   location: "eastus"
-  prefix: "sysmo"
+  prefix: "nowmetric"
 
   PROJECT: $(System.TeamProject)
   ORG: $(System.TeamFoundationCollectionUri)
