@@ -8,6 +8,9 @@
     "location": {
       "value": "eastus"
     },
+    "databaseUsername": {
+      "value": "mysqladmin"
+    },
     "databasePassword": {
       "value": ""
     },
@@ -15,6 +18,37 @@
       "value": ""
     },
     "alertScript": {
+      "value": ""
+    },
+    "vnetAddressPrefixes": {
+      "value": "10.2.0.0/16"
+    },
+    "snetAddressPrefix": {
+      "value": "10.2.0.0/24"
+    },
+    "snetDBAddressPrefix": {
+      "value": "10.2.1.0/24"
+    },
+    "dbPrivateIp": {
+      "value": "4"
+    },
+    "RgList": {
+      "value": [
+        "resourceGroupName1",
+        "resourceGroupName2",
+        "resourceGroupName2"
+      ]
+    },
+    "maxInstances": {
+      "value": 2
+    },
+    "minInstances": {
+      "value": 1
+    },
+    "cpuThreshold": {
+      "value": 75
+    },
+    "userObjectID": {
       "value": ""
     }
   }
