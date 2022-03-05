@@ -222,7 +222,7 @@
           "allOf": [
             {
               "threshold": "[parameters('cpuThreshold')]",
-              "name": "Metric1",
+              "name": "MetricCPU",
               "metricNamespace": "Microsoft.Web/serverFarms",
               "metricName": "CpuPercentage",
               "operator": "GreaterThan",
