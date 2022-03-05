@@ -137,7 +137,8 @@
         "FUNCTIONS_WORKER_RUNTIME": "dotnet",
         "FUNCTIONS_EXTENSION_VERSION": "~4",
         "WEBSITE_CONTENTSHARE": "[toLower(variables('alertAppName'))]",
-        "SLACK_URL": "[format('@Microsoft.KeyVault(SecretUri={0})',reference(variables('kvResourceId'), '2019-09-01').secretUriWithVersion)]"
+        //"SLACK_URL": "[format('@Microsoft.KeyVault(SecretUri={0})',reference(variables('kvResourceId'), '2019-09-01').secretUriWithVersion)]"
+        "SLACK_URL": "[uri(format('@Microsoft.KeyVault(SecretUri={0})',reference(variables('kvResourceId'), '2019-09-01').secretUriWithVersion),'/')]"
       }
     },
     {
