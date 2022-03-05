@@ -3,6 +3,9 @@
   "contentVersion": "1.0.0.0",
   "functions": [],
   "parameters": {
+    "userObjectID": {
+      "type": "string"
+    },
     "prefix": {
       "type": "string"
     },
@@ -10,69 +13,53 @@
       "type": "string"
     },
     "databaseUsername": {
-      "type": "string",
-      "defaultValue": "mysqladmin"
+      "type": "string"
     },
     "databasePassword": {
       "type": "securestring"
     },
     "cpuThreshold": {
-      "type": "int",
-      "metadata": {
-        "description": "description"
-      },
-      "defaultValue": 75
+      "type": "int"
     },
     "minInstances": {
-      "type": "int",
-      "defaultValue": 1
+      "type": "int"
     },
     "maxInstances": {
-      "type": "int",
-      "defaultValue": 2
+      "type": "int"
     },
     "slackURL": {
       "type": "securestring"
     },
     "alertScript": {
-      "type": "string",
-      "metadata": {
-        "description": "description"
-      }
+      "type": "string"
     },
     "vnetAddressPrefixes": {
-      "type": "string",
-      "defaultValue": "10.2.0.0/16"
+      "type": "string"
     },
     "snetAddressPrefix": {
-      "type": "string",
-      "defaultValue": "10.2.0.0/24"
+      "type": "string"
     },
     "snetDBAddressPrefix": {
-      "type": "string",
-      "defaultValue": "10.2.1.0/24"
+      "type": "string"
     },
     "dbPrivateIp": {
-      "type": "string",
-      "defaultValue": "4"
+      "type": "string"
     },
     "RgList": {
-      "type": "array",
-      "defaultValue": [
-        "resourceGroupName1",
-        "resourceGroupName2",
-        "resourceGroupName2"
-      ]
+      "type": "array"
     }
   },
   "variables": {
     "rg1": "[parameters('RgList')[0]]",
     "rg2": "[parameters('RgList')[1]]",
-    "rg3": "[parameters('RgList')[2]]"
+    "rg3": "[parameters('RgList')[2]]",
+    "deploymentName1": "deployCommonBase",
+    "deploymentName2": "deployCommonMetrics",
+    "deploymentName3": "deployWebApp"
   },
   "resources": [
     {
-      "name": "deployCommonBase",
+      "name": "[variables('deploymentName1')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "resourceGroup": "[variables('rg1')]",
@@ -105,53 +92,24 @@
           },
           "snetAddressPrefix": {
             "value": "[parameters('snetAddressPrefix')]"
-          }
-        }
-      }
-    },
-    {
-      "name": "deployCommonMetrics",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2021-04-01",
-      "resourceGroup": "[variables('rg2')]",
-      //"dependsOn": [
-      //  "[format('/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}',subscription().subscriptionId,variables('rg1'),'Microsoft.Resources/deployments', 'deployCommonBase')]"
-      //      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "relativePath": "artifacts/metrics.json"
-        },
-        "parameters": {
-          "prefix": {
-            "value": "[parameters('prefix')]"
           },
-          "location": {
-            "value": "[parameters('location')]"
-          },
-          "cpuThreshold": {
-            "value": "[parameters('cpuThreshold')]"
+          "userObjectID": {
+            "value": "[parameters('userObjectID')]"
           },
           "slackURL": {
             "value": "[parameters('slackURL')]"
-          },
-          "alertScript": {
-            "value": "[parameters('alertScript')]"
-          },
-          "webAppGroup": {
-            "value": "[variables('rg3')]"
           }
         }
       }
     },
     {
-      "name": "deployWebApp",
+      "name": "[variables('deploymentName3')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
       "resourceGroup": "[variables('rg3')]",
-      //"dependsOn": [
-      //  "[format('/subscriptions/{0}/resourceGroups/{1}/providers/{2}/{3}',subscription().subscriptionId,variables('rg2'),'Microsoft.Resources/deployments', 'deployCommonMetrics')]"
-      //],
+      "dependsOn": [
+        "[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('rg1'),variables('deploymentName1'))]"
+      ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -170,14 +128,46 @@
           "databaseUsername": {
             "value": "[parameters('databaseUsername')]"
           },
-          "databasePassword": {
-            "value": "[parameters('databasePassword')]"
-          },
           "minInstances": {
             "value": "[parameters('minInstances')]"
           },
           "maxInstances": {
             "value": "[parameters('maxInstances')]"
+          }
+        }
+      }
+    },
+    {
+      "name": "[variables('deploymentName2')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "resourceGroup": "[variables('rg2')]",
+      "dependsOn": [
+        "[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('rg3'),variables('deploymentName3'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "relativePath": "artifacts/metrics.json"
+        },
+        "parameters": {
+          "commonRG": {
+            "value": "[variables('rg1')]"
+          },
+          "prefix": {
+            "value": "[parameters('prefix')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "cpuThreshold": {
+            "value": "[parameters('cpuThreshold')]"
+          },
+          "alertScript": {
+            "value": "[parameters('alertScript')]"
+          },
+          "webAppGroup": {
+            "value": "[variables('rg3')]"
           }
         }
       }
