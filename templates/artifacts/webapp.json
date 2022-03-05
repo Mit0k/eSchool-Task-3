@@ -202,42 +202,6 @@
         "vnetResourceId": "[resourceId(parameters('commonRG'),'Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('snetName'))]",
         "isSwift": true
       }
-    },
-    {
-      "name": "SetKVAccessPolicy",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2021-04-01",
-      "subscriptionId": "[subscription().subscriptionId]",
-      "resourceGroup": "[parameters('commonRG')]",
-      "dependsOn": [
-        "[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Web/sites/{2}',subscription().subscriptionId,variables('currentRG'),variables('webAppName'))]"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "resources": [
-            {
-              "type": "Microsoft.KeyVault/vaults/accessPolicies",
-              "name": "[concat(variables('kvName'), '/add')]",
-              "apiVersion": "2021-11-01-preview",
-              "properties": {
-                "accessPolicies": [
-                  {
-                    "objectId": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.principalId]",
-                    "permissions": {
-                      "secrets": ["List", "Get", "Set"]
-                    },
-                    "tenantId": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.tenantId]"
-                  }
-                ]
-              }
-            }
-          ],
-          "outputs": {}
-        }
-      }
     }
   ],
   "outputs": {}

@@ -50,19 +50,22 @@
     }
   },
   "variables": {
-    "rg1": "[parameters('RgList')[0]]",
-    "rg2": "[parameters('RgList')[1]]",
-    "rg3": "[parameters('RgList')[2]]",
-    "deploymentName1": "deployCommonBase",
-    "deploymentName2": "deployCommonMetrics",
-    "deploymentName3": "deployWebApp"
+    "commonRG": "[parameters('RgList')[0]]",
+    "metricRG": "[parameters('RgList')[1]]",
+    "webappRG": "[parameters('RgList')[2]]",
+    "deploymentCommon": "deployCommonBase",
+    "deploymentMetrics": "deployCommonMetrics",
+    "deploymentWebApp": "deployWebApp",
+    "kvName": "[format('kv-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "webAppName": "[format('app-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "alertAppName": "[format('func-{0}-{1}',parameters('prefix'),parameters('location'))]"
   },
   "resources": [
     {
-      "name": "[variables('deploymentName1')]",
+      "name": "[variables('deploymentCommon')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "resourceGroup": "[variables('rg1')]",
+      "resourceGroup": "[variables('commonRG')]",
       "properties": {
         "mode": "Incremental",
         "templateLink": {
@@ -103,12 +106,12 @@
       }
     },
     {
-      "name": "[variables('deploymentName3')]",
+      "name": "[variables('deploymentWebApp')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "resourceGroup": "[variables('rg3')]",
+      "resourceGroup": "[variables('webappRG')]",
       "dependsOn": [
-        "[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('rg1'),variables('deploymentName1'))]"
+        "[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('commonRG'),variables('deploymentCommon'))]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -117,7 +120,7 @@
         },
         "parameters": {
           "commonRG": {
-            "value": "[variables('rg1')]"
+            "value": "[variables('commonRG')]"
           },
           "prefix": {
             "value": "[parameters('prefix')]"
@@ -138,12 +141,12 @@
       }
     },
     {
-      "name": "[variables('deploymentName2')]",
+      "name": "[variables('deploymentMetrics')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2021-04-01",
-      "resourceGroup": "[variables('rg2')]",
+      "resourceGroup": "[variables('metricRG')]",
       "dependsOn": [
-        "[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('rg3'),variables('deploymentName3'))]"
+        "[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('webappRG'),variables('deploymentWebApp'))]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -152,7 +155,7 @@
         },
         "parameters": {
           "commonRG": {
-            "value": "[variables('rg1')]"
+            "value": "[variables('commonRG')]"
           },
           "prefix": {
             "value": "[parameters('prefix')]"
@@ -167,9 +170,32 @@
             "value": "[parameters('alertScript')]"
           },
           "webAppGroup": {
-            "value": "[variables('rg3')]"
+            "value": "[variables('webappRG')]"
           }
         }
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/accessPolicies",
+      "name": "[concat(variables('kvName'), '/add')]",
+      "apiVersion": "2021-11-01-preview",
+      "properties": {
+        "accessPolicies": [
+          {
+            "objectId": "[reference(resourceId(variables('webappRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.principalId]",
+            "permissions": {
+              "secrets": ["List", "Get", "Set"]
+            },
+            "tenantId": "[reference(resourceId(variables('webappRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.tenantId]"
+          },
+          {
+            "objectId": "[reference(resourceId(variables('metricRG'),'Microsoft.Web/sites', variables('alertAppName')), '2021-02-01', 'Full').identity.principalId]",
+            "permissions": {
+              "secrets": ["List", "Get", "Set"]
+            },
+            "tenantId": "[reference(resourceId(variables('metricRG'),'Microsoft.Web/sites', variables('alertAppName')), '2021-02-01', 'Full').identity.tenantId]"
+          }
+        ]
       }
     }
   ],
