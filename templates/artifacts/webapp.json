@@ -90,8 +90,7 @@
       "apiVersion": "2021-02-01",
       "name": "[format('{0}/{1}', variables('webAppName'), 'appsettings')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Web/sites', variables('webAppName'))]",
-        "[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,parameters('commonRG'),'SetKVAccessPolicy')]"
+        "[resourceId('Microsoft.Web/sites', variables('webAppName'))]"
       ],
       "properties": {
         "ESCHOOL_APP_HOST": "[format('{0}.azurewebsites.net',variables('webAppName'))]",
