@@ -182,18 +182,18 @@
       "properties": {
         "accessPolicies": [
           {
-            "objectId": "[reference(format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('webappRG'),variables('webAppName')), '2021-02-01', 'Full').identity.principalId]",
+            "objectId": "[reference(format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Web/sites/{2}',subscription().subscriptionId,variables('webappRG'),variables('webAppName')), '2021-02-01', 'Full').identity.principalId]",
             "permissions": {
               "secrets": ["List", "Get", "Set"]
             },
-            "tenantId": "[reference(format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('webappRG'),variables('webAppName')), '2021-02-01', 'Full').identity.tenantId]"
+            "tenantId": "[reference(format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Web/sites/{2}',subscription().subscriptionId,variables('webappRG'),variables('webAppName')), '2021-02-01', 'Full').identity.tenantId]"
           },
           {
-            "objectId": "[reference(format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('metricRG'),variables('alertAppName')), '2021-02-01', 'Full').identity.principalId]",
+            "objectId": "[reference(format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Web/sites/{2}',subscription().subscriptionId,variables('metricRG'),variables('alertAppName')), '2021-02-01', 'Full').identity.principalId]",
             "permissions": {
               "secrets": ["List", "Get", "Set"]
             },
-            "tenantId": "[reference(format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('metricRG'),variables('alertAppName')), '2021-02-01', 'Full').identity.tenantId]"
+            "tenantId": "[reference(format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Web/sites/{2}',subscription().subscriptionId,variables('metricRG'),variables('alertAppName')), '2021-02-01', 'Full').identity.tenantId]"
           }
         ]
       }
