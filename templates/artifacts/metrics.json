@@ -213,7 +213,7 @@
             {
               "threshold": "[parameters('cpuThreshold')]",
               "name": "Metric1",
-              "metricName": "Percentage CPU",
+              "metricName": "CpuPercentage",
               "operator": "GreaterThan",
               "timeAggregation": "Average",
               "criterionType": "StaticThresholdCriterion"
