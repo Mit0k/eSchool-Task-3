@@ -179,6 +179,9 @@
       "type": "Microsoft.KeyVault/vaults/accessPolicies",
       "name": "[concat(variables('kvName'), '/add')]",
       "apiVersion": "2021-11-01-preview",
+      "dependsOn": [
+        "[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('metricRG'),variables('deploymentMetrics'))]"
+      ],
       "properties": {
         "accessPolicies": [
           {
