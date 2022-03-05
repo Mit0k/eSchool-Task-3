@@ -42,8 +42,7 @@
     "decreaseThreshold": 35,
     "kvName": "[format('kv-{0}-{1}',parameters('prefix'),parameters('location'))]",
     "kvResourceId": "[resourceId(parameters('commonRG'),'Microsoft.KeyVault/vaults/secrets',variables('kvName'),variables('dbPassName'))]",
-    "dbPassName": "[format('{0}Pass',variables('dbServerName'))]",
-    "currentRG": "[resourceGroup().name]"
+    "dbPassName": "[format('{0}Pass',variables('dbServerName'))]"
   },
   "resources": [
     {
@@ -96,8 +95,8 @@
         "ESCHOOL_APP_HOST": "[format('{0}.azurewebsites.net',variables('webAppName'))]",
         "DATASOURCE_PASSWORD": "[format('@Microsoft.KeyVault(SecretUri={0})',reference(variables('kvResourceId'), '2019-09-01').secretUriWithVersion)]",
         "DATASOURCE_USERNAME": "[format('{0}',parameters('databaseUsername'))]",
-        //"DATASOURCE_URL": "[format('jdbc:mysql://{0}.mysql.database.azure.com:3306/{1}?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=true&enabledTLSProtocols=TLSv1.2',variables('dbServerName'),variables('projectDatabaseName'))]"
-        "DATASOURCE_URL": "[uri(format('jdbc:mysql://{0}.mysql.database.azure.com:3306/{1}?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=true&enabledTLSProtocols=TLSv1.2',variables('dbServerName'),variables('projectDatabaseName')),'/')]"
+        "DATASOURCE_URL": "[format('jdbc:mysql://{0}.mysql.database.azure.com:3306/{1}?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=true&enabledTLSProtocols=TLSv1.2',variables('dbServerName'),variables('projectDatabaseName'))]"
+        //"DATASOURCE_URL": "[uri(format('jdbc:mysql://{0}.mysql.database.azure.com:3306/{1}?useUnicode=true&characterEncoding=utf8&createDatabaseIfNotExist=true&autoReconnect=true&useSSL=true&enabledTLSProtocols=TLSv1.2',variables('dbServerName'),variables('projectDatabaseName')),'/')]"
       }
     },
     {

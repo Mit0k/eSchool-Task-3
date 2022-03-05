@@ -40,7 +40,6 @@
     "storageSku": "Standard_LRS",
     "appInsightsName": "AppInsights",
     "alertAppHostKey": "[format('{0}/host/default', resourceId('Microsoft.Web/sites', variables('alertAppName')))]",
-    "currentRG": "[resourceGroup().name]",
     "kvName": "[format('kv-{0}-{1}',parameters('prefix'),parameters('location'))]",
     "kvResourceId": "[resourceId(parameters('commonRG'),'Microsoft.KeyVault/vaults/secrets',variables('kvName'),'slackURL')]"
   },
@@ -136,8 +135,8 @@
         "FUNCTIONS_WORKER_RUNTIME": "dotnet",
         "FUNCTIONS_EXTENSION_VERSION": "~4",
         "WEBSITE_CONTENTSHARE": "[toLower(variables('alertAppName'))]",
-        //"SLACK_URL": "[format('@Microsoft.KeyVault(SecretUri={0})',reference(variables('kvResourceId'), '2019-09-01').secretUriWithVersion)]"
-        "SLACK_URL": "[uri(format('@Microsoft.KeyVault(SecretUri={0})',reference(variables('kvResourceId'), '2019-09-01').secretUriWithVersion),'/')]"
+        "SLACK_URL": "[format('@Microsoft.KeyVault(SecretUri={0})',reference(variables('kvResourceId'), '2019-09-01').secretUriWithVersion)]"
+        //"SLACK_URL": "[uri(format('@Microsoft.KeyVault(SecretUri={0})',reference(variables('kvResourceId'), '2019-09-01').secretUriWithVersion),'/')]"
       }
     },
     {
