@@ -182,18 +182,18 @@
       "properties": {
         "accessPolicies": [
           {
-            "objectId": "[reference(resourceId(subscription().id,variables('webappRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.principalId]",
+            "objectId": "[reference(format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('webappRG'),variables('webAppName')), '2021-02-01', 'Full').identity.principalId]",
             "permissions": {
               "secrets": ["List", "Get", "Set"]
             },
-            "tenantId": "[reference(resourceId(subscription().id,variables('webappRG'),'Microsoft.Web/sites', variables('webAppName')), '2021-02-01', 'Full').identity.tenantId]"
+            "tenantId": "[reference(format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('webappRG'),variables('webAppName')), '2021-02-01', 'Full').identity.tenantId]"
           },
           {
-            "objectId": "[reference(resourceId(subscription().id,variables('metricRG'),'Microsoft.Web/sites', variables('alertAppName')), '2021-02-01', 'Full').identity.principalId]",
+            "objectId": "[reference(format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('metricRG'),variables('alertAppName')), '2021-02-01', 'Full').identity.principalId]",
             "permissions": {
               "secrets": ["List", "Get", "Set"]
             },
-            "tenantId": "[reference(resourceId(subscription().id,variables('metricRG'),'Microsoft.Web/sites', variables('alertAppName')), '2021-02-01', 'Full').identity.tenantId]"
+            "tenantId": "[reference(format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,variables('metricRG'),variables('alertAppName')), '2021-02-01', 'Full').identity.tenantId]"
           }
         ]
       }
