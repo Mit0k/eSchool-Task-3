@@ -30,7 +30,7 @@
     }
   },
   "variables": {
-    "mainAppName": "[format('app-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "mainAppPlanName": "[format('plan-{0}-{1}',parameters('prefix'),parameters('location'))]",
     "alertAppName": "[format('func-{0}-{1}',parameters('prefix'),parameters('location'))]",
     "alertAppPlanName": "[format('plan-alert-{0}-{1}',parameters('prefix'),parameters('location'))]",
     "alertFunctionName": "SlackTrigger",
@@ -206,7 +206,7 @@
         "severity": 0,
         "enabled": true,
         "scopes": [
-          "[resourceId(parameters('webAppGroup'), 'Microsoft.Web/serverFarms', variables('mainAppName'))]"
+          "[resourceId(parameters('webAppGroup'), 'Microsoft.Web/serverFarms', variables('mainAppPlanName'))]"
         ],
         "evaluationFrequency": "PT1M",
         "windowSize": "PT1M",
