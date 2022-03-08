@@ -14,11 +14,11 @@ if (!$prefix) {$prefix = 'armeschool'}
 $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
 $deploymentName="WebAppDeploy"+"${today}"
 
-$secret = Get-AzKeyVaultSecret -VaultName 'kv-upser-eastus' -Name 'db-upser-eastusPass'
-if (!$secretText)
+$DbPassFromKV = Get-AzKeyVaultSecret -VaultName 'kv-upser-eastus' -Name 'db-upser-eastusPass'
+if (!$DbPassFromKV)
     $DatabasePassword = ConvertTo-SecureString (Get-RandomPassword 8)  -AsPlainText -Force
 else
-    $DatabasePassword = $secret
+    $DatabasePassword = $DbPassFromKV
 $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
 
 Write-Host "##[debug]Getting resource group"
