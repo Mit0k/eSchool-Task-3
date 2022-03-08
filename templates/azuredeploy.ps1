@@ -4,6 +4,7 @@ $ws.Name
 $name = $ws.Name.Split()[-1]
 $app=Get-AzADServicePrincipal  -SearchString $name
 $app.AppId
+Write-Host "##[section]Preparations"
 exit
 Write-Host "##[section]Preparations"
 Write-Host "##[debug]Loading main template files"
