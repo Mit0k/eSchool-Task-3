@@ -1,12 +1,5 @@
 param($Location, $prefix, $slackURL, $userObjectID)
-$ws=Get-AzContext
-$ws.Name
-$name = $ws.Name.Split()[-1]
-$name.Length
-$name[0]
-$app=$name+"ESRA"
-$app
-Write-Host "##[section]END"
+Get-AzADServicePrincipal
 exit
 Write-Host "##[section]Preparations"
 Write-Host "##[debug]Loading main template files"
@@ -17,8 +10,10 @@ $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
 . "scripts\generatePass.ps1"
 
 Write-Host "##[debug]Setting variables"
+$context = (Get-AzContext).Name.Split()
+$appID =$context[-1]
+$tenantID =$context[-3]
 if (!$prefix) {$prefix = 'armeschool'}
-
 $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
 $deploymentName="WebAppDeploy"+"${today}"
 
@@ -69,6 +64,7 @@ $errorMessage=New-AzDeployment `
     -prefix $prefix  -databasePassword $databasePassword `
     -slackURL $slackURL -alertScript $alertScript `
     -RgList $ResourceGroupNames -userObjectID $userObjectID `
+    -appID $appID -tenantID $tenantID `
     -ErrorVariable notValid -ErrorAction SilentlyContinue
 if ($notValid) {
     Write-Host "##[error][Template spec]::Deploying failed"
