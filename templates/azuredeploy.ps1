@@ -1,5 +1,7 @@
 param($Location, $prefix, $slackURL, $userObjectID)
-Get-AzADServicePrincipal
+$c=Get-AzContext
+Write-Host ($c | Format-List | Out-String)
+Get-AzADServicePrincipal -SearchString mitokalexander-DevOpsInternship-9e88ee1e-64d5-43ec-8e50-c28146fbf488
 exit
 Write-Host "##[section]Preparations"
 Write-Host "##[debug]Loading main template files"
