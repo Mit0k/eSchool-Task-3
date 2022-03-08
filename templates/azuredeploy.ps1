@@ -15,10 +15,10 @@ $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
 $deploymentName="WebAppDeploy"+"${today}"
 
 $DbPassFromKV = Get-AzKeyVaultSecret -VaultName 'kv-upser-eastus' -Name 'db-upser-eastusPass'
-if (!$DbPassFromKV)
-    $DatabasePassword = ConvertTo-SecureString (Get-RandomPassword 8)  -AsPlainText -Force
-else
-    $DatabasePassword = $DbPassFromKV
+if ( !$DbPassFromKV ) {
+    $DatabasePassword = ConvertTo-SecureString (Get-RandomPassword 8)  -AsPlainText -Force }
+else {
+    $DatabasePassword = $DbPassFromKV}
 $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
 
 Write-Host "##[debug]Getting resource group"
