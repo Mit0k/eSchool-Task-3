@@ -1,7 +1,8 @@
 param($Location, $prefix, $slackURL, $userObjectID)
 $ws=Get-AzContext
 $ws.Name
-$ws.Name.Split()[-1]
+$name = $ws.Name.Split()[-1]
+Get-AzADServicePrincipal  -SearchString $name
 exit
 Write-Host "##[section]Preparations"
 Write-Host "##[debug]Loading main template files"
