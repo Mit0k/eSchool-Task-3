@@ -3,6 +3,7 @@ $ws=Get-AzContext
 $ws.Name
 $name = $ws.Name.Split()[-1]
 $name.Length
+ConvertFrom-SecureString -SecureString $name -AsPlainText
 $app=$name+"ESRA"
 $app
 Write-Host "##[section]END"
