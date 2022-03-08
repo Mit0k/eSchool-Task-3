@@ -1,5 +1,8 @@
 param($Location, $prefix, $slackURL, $userObjectID)
-
+$ws=Get-AzContext
+$ws.Name
+$ws.Name.Split()[-1]
+exit
 Write-Host "##[section]Preparations"
 Write-Host "##[debug]Loading main template files"
 
