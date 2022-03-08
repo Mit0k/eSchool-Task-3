@@ -2,9 +2,9 @@ param($Location, $prefix, $slackURL, $userObjectID)
 $c=Get-AzContext
 Write-Host ($c | Format-List | Out-String)
 Write-Host "##[section]I"
-#Get-AzADServicePrincipal -SearchString $c.Id
+$c.Id
 Write-Host "##[section]II"
-Get-AzADServicePrincipal -SearchString $c.Name
+$c.Name
 Write-Host "##[section]F"
 Get-AzADServicePrincipal -SearchString mitokalexander-DevOpsInternship-9e88ee1e-64d5-43ec-8e50-c28146fbf488
 exit
