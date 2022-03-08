@@ -3,8 +3,8 @@ $ws=Get-AzContext
 $ws.Name
 $name = $ws.Name.Split()[-1]
 $name.Length
-$app=Get-AzADServicePrincipal -ObjectId $name
-$app.AppId
+$app=$name+"ESRA"
+$app
 Write-Host "##[section]END"
 exit
 Write-Host "##[section]Preparations"
