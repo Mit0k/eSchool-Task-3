@@ -3,10 +3,9 @@ $ws=Get-AzContext
 $ws.Name
 $name = $ws.Name.Split()[-1]
 $name.Length
-$app=Get-AzADServicePrincipal -SearchString $name
-Get-AzADServicePrincipal
+$app=Get-AzADServicePrincipal -ObjectId $name
 $app.AppId
-Write-Host "##[section]Preparations"
+Write-Host "##[section]END"
 exit
 Write-Host "##[section]Preparations"
 Write-Host "##[debug]Loading main template files"
