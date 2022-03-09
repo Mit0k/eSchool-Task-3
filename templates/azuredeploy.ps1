@@ -9,14 +9,17 @@ $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
 
 Write-Host "##[debug]Setting variables"
 Write-Host "##[debug]Setting variables::Get current appID & objectID"
+
 $context=Get-AzContext
-$accountName = $context.Name.Split()[-1]
-$current_appID=Get-AzADServicePrincipal -Filter "AppId eq '$accountName'"
+$current_appID = $context.Name.Split()[-1]
+$app=Get-AzADServicePrincipal -Filter "AppId eq '$accountName'"
 $current_objID = $app.Id
+
 Write-Host "##[debug]Setting variables:Default variables"
 if (!$prefix) {$prefix = 'armeschool'}
 $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
 $deploymentName="eSchoolProjectDEPLOY"+"${today}"
+
 Write-Host "##[debug]Setting variables:Lookup for secrets from KV"
 $DbPassFromKV = Get-AzKeyVaultSecret -VaultName 'kv-upser-eastus' -Name 'db-upser-eastusPass' -ErrorVariable notPresent -ErrorAction silentlycontinue
 if ($notPresent) {
