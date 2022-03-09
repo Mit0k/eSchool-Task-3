@@ -1,5 +1,5 @@
 param($Location, $prefix, $slackURL, $userObjectID)
-Write-Host "##[section]Preparations"
+Write-Host "##[group]Preparations"
 Write-Host "##[debug]Loading main template files"
 
 $TemplateFile="templates\azuredeploy.json"
@@ -33,7 +33,7 @@ if ( !$DbPassFromKV ) {
     $DatabasePassword = ConvertTo-SecureString (Get-RandomPassword 8)  -AsPlainText -Force }
 else {
     Write-Host "##[debug]Getting secrets from KV"
-    $DatabasePassword = $DbPassFromKV }
+    $DatabasePassword = ConvertTo-SecureString $DbPassFromKV -AsPlainText -Force}
 
 Write-Host "##[debug]Converting plain-text secrets to SecureString"
 $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
@@ -57,7 +57,7 @@ Foreach ($rg in $ResourceGroupNames){
 }
 
 Write-Host "##[endgroup]"
-Write-Host "##[section]Deploying template"
+Write-Host "##[group]Deploying template"
 Write-Host "##[debug][Template spec]::Create"
 New-AzTemplateSpec `
     -Name webAppSpec `
