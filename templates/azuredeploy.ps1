@@ -1,13 +1,14 @@
 param($Location, $prefix, $slackURL, $userObjectID)
-$c=Get-AzContext
+$context=Get-AzContext
+$acc = $context.Name.Split()[-1]
 Write-Host ($c | Format-List | Out-String)
-Write-Host "##[section]I"
-$c.Id
+Write-Host "##[section]Account"
+Write-Host $acc
 Write-Host "##[section]II"
-$c.Name
+Get-AzADServicePrincipal -SearchString $acc
 Write-Host "##[section]F"
 Get-AzADServicePrincipal -SearchString mitokalexander-DevOpsInternship-9e88ee1e-64d5-43ec-8e50-c28146fbf488
-#exit
+exit
 Write-Host "##[section]Preparations"
 Write-Host "##[debug]Loading main template files"
 
