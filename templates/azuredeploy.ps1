@@ -14,6 +14,7 @@ $context=Get-AzContext
 $current_appID = $context.Name.Split()[-1]
 $app=Get-AzADServicePrincipal -Filter "AppId eq '$current_appID'"
 $current_objID = $app.Id
+$current_tenant= $context.Tenant.Id
 
 Write-Host "##[debug]Setting variables:Default variables"
 if (!$prefix) {$prefix = 'armeschool'}
@@ -36,7 +37,7 @@ else {
 
 Write-Host "##[debug]Converting plain-text secrets to SecureString"
 $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
-$current_appID = ConvertTo-SecureString $current_appID  -AsPlainText -Force
+$current_tenant = ConvertTo-SecureString $current_tenant  -AsPlainText -Force
 $current_objID = ConvertTo-SecureString $current_objID  -AsPlainText -Force
 
 
@@ -80,7 +81,7 @@ $errorMessage=New-AzDeployment `
     -prefix $prefix  -databasePassword $databasePassword `
     -slackURL $slackURL -alertScript $alertScript `
     -RgList $ResourceGroupNames -userObjectID $userObjectID `
-    -appID $current_appID -tenantID $current_appID `
+    -appID $current_objID -tenantID $current_tenant `
     -ErrorVariable notValid -ErrorAction SilentlyContinue
 if ($notValid) {
     Write-Host "##[error][Template spec]::Deploying failed"
