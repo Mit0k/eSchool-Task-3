@@ -83,7 +83,7 @@ $errorMessage=New-AzDeployment `
     -slackURL $slackURL -alertScript $alertScript `
     -RgList $ResourceGroupNames -userObjectID $userObjectID `
     -appID $current_objID -tenantID $current_tenant `
-    -WhatIf -Confirm:$false `
+    -WhatIf -Force `
     -ErrorVariable notValid -ErrorAction SilentlyContinue
 Write-Host "##[endgroup]"
 if ($notValid) {
