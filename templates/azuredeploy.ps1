@@ -1,6 +1,5 @@
 param($Location, $prefix, $slackURL, $userObjectID)
-
-Write-Host "##[section]Preparations"
+Write-Host "##[group]Preparations"
 Write-Host "##[debug]Loading main template files"
 
 $TemplateFile="templates\azuredeploy.json"
@@ -9,13 +8,38 @@ $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
 . "scripts\generatePass.ps1"
 
 Write-Host "##[debug]Setting variables"
+Write-Host "##[debug]Setting variables::Get current appID & objectID"
+
+$context=Get-AzContext
+$current_appID = $context.Name.Split()[-1]
+$app=Get-AzADServicePrincipal -Filter "AppId eq '$current_appID'"
+$current_objID = $app.Id
+$current_tenant= $context.Tenant.Id
+
+Write-Host "##[debug]Setting variables:Default variables"
 if (!$prefix) {$prefix = 'armeschool'}
-
 $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
-$deploymentName="WebAppDeploy"+"${today}"
+$deploymentName="eSchoolProjectDEPLOY"+"${today}"
 
-$DatabasePassword = ConvertTo-SecureString (Get-RandomPassword 8)  -AsPlainText -Force
+Write-Host "##[debug]Setting variables:Lookup for secrets from KV"
+$DbPassFromKV = Get-AzKeyVaultSecret -VaultName "kv-$prefix-$location" -Name "db-$prefix-${location}Pass" -AsPlainText -ErrorVariable notPresent -ErrorAction silentlycontinue
+if ($notPresent) {
+    Write-Host "##[warning]Access denied for KV"
+    Write-Host $notPresent.Message
+    Write-Host "##[debug]Creating new infrastructure"
+}
+if ( !$DbPassFromKV ) {
+    Write-Host "##[debug]Generating new secrets"
+    $DatabasePassword = ConvertTo-SecureString (Get-RandomPassword 8)  -AsPlainText -Force }
+else {
+    Write-Host "##[debug]Getting secrets from KV"
+    $DatabasePassword = ConvertTo-SecureString $DbPassFromKV -AsPlainText -Force}
+
+Write-Host "##[debug]Converting plain-text secrets to SecureString"
 $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
+$current_tenant = ConvertTo-SecureString $current_tenant  -AsPlainText -Force
+$current_objID = ConvertTo-SecureString $current_objID  -AsPlainText -Force
+
 
 Write-Host "##[debug]Getting resource group"
 $ResourceGroupNames = @()
@@ -33,7 +57,7 @@ Foreach ($rg in $ResourceGroupNames){
 }
 
 Write-Host "##[endgroup]"
-Write-Host "##[section]Deploying template"
+Write-Host "##[group]Deploying template"
 Write-Host "##[debug][Template spec]::Create"
 New-AzTemplateSpec `
     -Name webAppSpec `
@@ -49,15 +73,18 @@ Write-Host $notValid.Message
 Write-Host $notValid.Details
 Write-Host "##[debug][Template spec]::Getting ID"
 $id = (Get-AzTemplateSpec -ResourceGroupName $ResourceGroupNames[0] -Name webAppSpec -Version "1.0.0.0").Versions.Id
+Write-Host "##[debug][Template spec]::ID= $ID"
 Write-Host "##[debug][Template spec]::Deploying"
-
+Write-Host "##[group]What if"
 $errorMessage=New-AzDeployment `
     -TemplateSpecId $id -TemplateParameterFile $TemplateParameterFile `
     -Name $deploymentName -Location $Location `
     -prefix $prefix  -databasePassword $databasePassword `
     -slackURL $slackURL -alertScript $alertScript `
     -RgList $ResourceGroupNames -userObjectID $userObjectID `
+    -appID $current_objID -tenantID $current_tenant `
     -ErrorVariable notValid -ErrorAction SilentlyContinue
+Write-Host "##[endgroup]"
 if ($notValid) {
     Write-Host "##[error][Template spec]::Deploying failed"
     Write-Host $errorMessage

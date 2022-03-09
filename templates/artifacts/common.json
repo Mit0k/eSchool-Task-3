@@ -56,6 +56,12 @@
     },
     "slackURL": {
       "type": "securestring"
+    },
+    "appID": {
+      "type": "securestring"
+    },
+    "tenantID": {
+      "type": "securestring"
     }
   },
   "variables": {
@@ -197,6 +203,13 @@
           {
             "objectId": "[parameters('userObjectID')]",
             "tenantId": "[subscription().tenantId]",
+            "permissions": {
+              "secrets": ["List", "Get", "Set"]
+            }
+          },
+          {
+            "objectId": "[parameters('appID')]",
+            "tenantId": "[parameters('tenantID')]",
             "permissions": {
               "secrets": ["List", "Get", "Set"]
             }

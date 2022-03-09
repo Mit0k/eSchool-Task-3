@@ -50,6 +50,12 @@
     },
     "userObjectID": {
       "value": ""
+    },
+    "appID": {
+      "value": "" // TODO: Fill in parameter value
+    },
+    "tenantID": {
+      "value": "" // TODO: Fill in parameter value
     }
   }
 }

@@ -6,6 +6,12 @@
     "userObjectID": {
       "type": "string"
     },
+    "appID": {
+      "type": "securestring"
+    },
+    "tenantID": {
+      "type": "securestring"
+    },
     "prefix": {
       "type": "string"
     },
@@ -98,6 +104,12 @@
           },
           "slackURL": {
             "value": "[parameters('slackURL')]"
+          },
+          "appID": {
+            "value": "[parameters('appID')]"
+          },
+          "tenantID": {
+            "value": "[parameters('tenantID')]"
           }
         }
       }
