@@ -75,7 +75,7 @@ Write-Host "##[debug][Template spec]::Getting ID"
 $id = (Get-AzTemplateSpec -ResourceGroupName $ResourceGroupNames[0] -Name webAppSpec -Version "1.0.0.0").Versions.Id
 Write-Host "##[debug][Template spec]::ID= $ID"
 Write-Host "##[debug][Template spec]::Deploying"
-
+Write-Host "##[group]What if"
 $errorMessage=New-AzDeployment `
     -TemplateSpecId $id -TemplateParameterFile $TemplateParameterFile `
     -Name $deploymentName -Location $Location `
@@ -85,6 +85,7 @@ $errorMessage=New-AzDeployment `
     -appID $current_objID -tenantID $current_tenant `
     -WhatIf -Confirm:$false `
     -ErrorVariable notValid -ErrorAction SilentlyContinue
+Write-Host "##[endgroup]"
 if ($notValid) {
     Write-Host "##[error][Template spec]::Deploying failed"
     Write-Host $errorMessage
