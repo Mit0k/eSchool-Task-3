@@ -77,6 +77,7 @@ Write-Host "##[debug][Template spec]::ID= $ID"
 Write-Host "##[debug][Template spec]::Deploying"
 
 $errorMessage=New-AzDeployment `
+    -Mode Incremental `
     -TemplateSpecId $id -TemplateParameterFile $TemplateParameterFile `
     -Name $deploymentName -Location $Location `
     -prefix $prefix  -databasePassword $databasePassword `
