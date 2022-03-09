@@ -83,7 +83,7 @@ $errorMessage=New-AzDeployment `
     -slackURL $slackURL -alertScript $alertScript `
     -RgList $ResourceGroupNames -userObjectID $userObjectID `
     -appID $current_objID -tenantID $current_tenant `
-    -WhatIf `
+    -WhatIf -Confirm:$false `
     -ErrorVariable notValid -ErrorAction SilentlyContinue
 if ($notValid) {
     Write-Host "##[error][Template spec]::Deploying failed"
