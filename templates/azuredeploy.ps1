@@ -1,14 +1,4 @@
 param($Location, $prefix, $slackURL, $userObjectID)
-$context=Get-AzContext
-$acc = $context.Name.Split()[-1]
-Write-Host ($c | Format-List | Out-String)
-Write-Host "##[section]Account"
-Write-Host $acc
-Write-Host "##[section]II"
-Get-AzADServicePrincipal -SearchString $acc
-Write-Host "##[section]F"
-Get-AzADServicePrincipal -SearchString mitokalexander-DevOpsInternship-9e88ee1e-64d5-43ec-8e50-c28146fbf488
-exit
 Write-Host "##[section]Preparations"
 Write-Host "##[debug]Loading main template files"
 
@@ -18,17 +8,27 @@ $alertScript = Get-Content -Path "scripts\alertScript.csx" -Raw
 . "scripts\generatePass.ps1"
 
 Write-Host "##[debug]Setting variables"
-$context = (Get-AzContext).Name.Split()
-$appID =$context[-1]
-$tenantID =$context[-3]
+Write-Host "##[debug]Setting variables::Get current appID & objectID"
+$context=Get-AzContext
+$accountName = $context.Name.Split()[-1]
+$current_appID=Get-AzADServicePrincipal -Filter "AppId eq '$accountName'"
+$current_objID = $app.Id
+Write-Host "##[debug]Setting variables:Default variables"
 if (!$prefix) {$prefix = 'armeschool'}
 $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
-$deploymentName="WebAppDeploy"+"${today}"
-
-$DbPassFromKV = Get-AzKeyVaultSecret -VaultName 'kv-upser-eastus' -Name 'db-upser-eastusPass'
+$deploymentName="eSchoolProjectDEPLOY"+"${today}"
+Write-Host "##[debug]Setting variables:Lookup for secrets from KV"
+$DbPassFromKV = Get-AzKeyVaultSecret -VaultName 'kv-upser-eastus' -Name 'db-upser-eastusPass' -ErrorVariable notPresent -ErrorAction silentlycontinue
+if ($notPresent) {
+    Write-Host "##[warning]Access denied for KV"
+    Write-Host $notPresent.Message
+    Write-Host "##[debug]Creating new infrastructure"
+}
 if ( !$DbPassFromKV ) {
+    Write-Host "##[debug]Generating new secrets"
     $DatabasePassword = ConvertTo-SecureString (Get-RandomPassword 8)  -AsPlainText -Force }
 else {
+    Write-Host "##[debug]Getting secrets from KV"
     $DatabasePassword = $DbPassFromKV}
 $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
 
@@ -72,7 +72,7 @@ $errorMessage=New-AzDeployment `
     -prefix $prefix  -databasePassword $databasePassword `
     -slackURL $slackURL -alertScript $alertScript `
     -RgList $ResourceGroupNames -userObjectID $userObjectID `
-    -appID $appID -tenantID $tenantID `
+    -appID $current_appID -tenantID $current_appID `
     -ErrorVariable notValid -ErrorAction SilentlyContinue
 if ($notValid) {
     Write-Host "##[error][Template spec]::Deploying failed"
