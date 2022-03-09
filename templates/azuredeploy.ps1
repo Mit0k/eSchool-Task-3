@@ -33,7 +33,12 @@ if ( !$DbPassFromKV ) {
 else {
     Write-Host "##[debug]Getting secrets from KV"
     $DatabasePassword = $DbPassFromKV}
+
+Write-Host "##[debug]Converting plain-text secrets to SecureString"
 $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
+$current_appID = ConvertTo-SecureString $current_appID  -AsPlainText -Force
+$current_objID = ConvertTo-SecureString $current_objID  -AsPlainText -Force
+
 
 Write-Host "##[debug]Getting resource group"
 $ResourceGroupNames = @()
