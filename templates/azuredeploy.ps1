@@ -22,7 +22,7 @@ $today=Get-Date -Format "MM-dd-yyyy-HH-mm"
 $deploymentName="eSchoolProjectDEPLOY"+"${today}"
 
 Write-Host "##[debug]Setting variables:Lookup for secrets from KV"
-$DbPassFromKV = Get-AzKeyVaultSecret -VaultName 'kv-upser-eastus' -Name 'db-upser-eastusPass' -ErrorVariable notPresent -ErrorAction silentlycontinue
+$DbPassFromKV = Get-AzKeyVaultSecret -VaultName "kv-$prefix-$location" -Name "db-$prefix-${location}Pass" -AsPlainText -ErrorVariable notPresent -ErrorAction silentlycontinue
 if ($notPresent) {
     Write-Host "##[warning]Access denied for KV"
     Write-Host $notPresent.Message
@@ -33,7 +33,7 @@ if ( !$DbPassFromKV ) {
     $DatabasePassword = ConvertTo-SecureString (Get-RandomPassword 8)  -AsPlainText -Force }
 else {
     Write-Host "##[debug]Getting secrets from KV"
-    $DatabasePassword = $DbPassFromKV}
+    $DatabasePassword = $DbPassFromKV }
 
 Write-Host "##[debug]Converting plain-text secrets to SecureString"
 $slackURL = ConvertTo-SecureString $slackURL  -AsPlainText -Force
@@ -73,6 +73,7 @@ Write-Host $notValid.Message
 Write-Host $notValid.Details
 Write-Host "##[debug][Template spec]::Getting ID"
 $id = (Get-AzTemplateSpec -ResourceGroupName $ResourceGroupNames[0] -Name webAppSpec -Version "1.0.0.0").Versions.Id
+Write-Host "##[debug][Template spec]::ID= $ID"
 Write-Host "##[debug][Template spec]::Deploying"
 
 $errorMessage=New-AzDeployment `
