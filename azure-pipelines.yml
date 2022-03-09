@@ -1,6 +1,6 @@
 variables:
   location: "eastus"
-  prefix: "upser"
+  prefix: "crfinal"
 
   PROJECT: $(System.TeamProject)
   ORG: $(System.TeamFoundationCollectionUri)
