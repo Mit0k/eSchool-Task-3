@@ -12,7 +12,7 @@ Write-Host "##[debug]Setting variables::Get current appID & objectID"
 
 $context=Get-AzContext
 $current_appID = $context.Name.Split()[-1]
-$app=Get-AzADServicePrincipal -Filter "AppId eq '$accountName'"
+$app=Get-AzADServicePrincipal -Filter "AppId eq '$current_appID'"
 $current_objID = $app.Id
 
 Write-Host "##[debug]Setting variables:Default variables"
