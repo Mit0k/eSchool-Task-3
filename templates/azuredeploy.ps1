@@ -77,13 +77,13 @@ Write-Host "##[debug][Template spec]::ID= $ID"
 Write-Host "##[debug][Template spec]::Deploying"
 
 $errorMessage=New-AzDeployment `
-    -Mode Incremental `
     -TemplateSpecId $id -TemplateParameterFile $TemplateParameterFile `
     -Name $deploymentName -Location $Location `
     -prefix $prefix  -databasePassword $databasePassword `
     -slackURL $slackURL -alertScript $alertScript `
     -RgList $ResourceGroupNames -userObjectID $userObjectID `
     -appID $current_objID -tenantID $current_tenant `
+    -WhatIf `
     -ErrorVariable notValid -ErrorAction SilentlyContinue
 if ($notValid) {
     Write-Host "##[error][Template spec]::Deploying failed"
