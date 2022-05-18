@@ -1,0 +1,272 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "functions": [],
+  "parameters": {
+    "prefix": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "cpuThreshold": {
+      "type": "int",
+      "metadata": {
+        "description": "description"
+      },
+      "defaultValue": 75
+    },
+    "alertScript": {
+      "type": "string",
+      "metadata": {
+        "description": "description"
+      }
+    },
+    "webAppGroup": {
+      "type": "string"
+    },
+    "commonRG": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "mainAppPlanName": "[format('plan-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "alertAppName": "[format('func-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "alertAppPlanName": "[format('plan-alert-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "alertFunctionName": "SlackTrigger",
+    "metricAlertsName": "[format('metric-alert-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "actionGroupsName": "[concat('ag-',parameters('location'))]",
+    "storageAccountName": "[take(toLower(format('st{0}{1}',parameters('prefix'),uniqueString(parameters('prefix')))),24)]",
+    "storageSku": "Standard_LRS",
+    "appInsightsName": "AppInsights",
+    "alertAppHostKey": "[format('{0}/host/default', resourceId('Microsoft.Web/sites', variables('alertAppName')))]",
+    "currentRG": "[resourceGroup().name]",
+    "kvName": "[format('kv-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "kvResourceId": "[resourceId(parameters('commonRG'),'Microsoft.KeyVault/vaults/secrets',variables('kvName'),'slackURL')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2020-02-02",
+      "name": "[variables('appInsightsName')]",
+      "location": "[parameters('location')]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2021-04-01",
+      "name": "[variables('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[variables('storageSku')]"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "supportsHttpsTrafficOnly": true,
+        "encryption": {
+          "services": {
+            "file": {
+              "keyType": "Account",
+              "enabled": true
+            },
+            "blob": {
+              "keyType": "Account",
+              "enabled": true
+            }
+          },
+          "keySource": "Microsoft.Storage"
+        },
+        "accessTier": "Hot"
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2021-02-01",
+      "name": "[variables('alertAppPlanName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Y1",
+        "tier": "Dynamic",
+        "size": "Y1",
+        "family": "Y",
+        "capacity": 0
+      },
+      "kind": "functionapp"
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2020-12-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('alertAppPlanName'))]",
+        "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ],
+      "name": "[variables('alertAppName')]",
+      "location": "[parameters('location')]",
+      "kind": "functionapp",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "enabled": true,
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms',variables('alertAppPlanName'))]",
+        "siteConfig": {
+          "numberOfWorkers": 1,
+          "httpsOnly": true
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2021-02-01",
+      "name": "[format('{0}/{1}', variables('alertAppName'), 'appsettings')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('alertAppName'))]",
+        "[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Resources/deployments/{2}',subscription().subscriptionId,parameters('commonRG'),'SetKVAccessPolicy')]"
+      ],
+      "properties": {
+        "APPINSIGHTS_INSTRUMENTATIONKEY": "[reference(resourceId('Microsoft.Insights/components', variables('appInsightsName'))).InstrumentationKey]",
+        "APPLICATIONINSIGHTS_CONNECTION_STRING": "[format('InstrumentationKey={0}', reference(resourceId('Microsoft.Insights/components', variables('appInsightsName'))).InstrumentationKey)]",
+        "AzureWebJobsStorage": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-04-01').keys[0].value)]",
+        "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[format('DefaultEndpointsProtocol=https;AccountName={0};EndpointSuffix={1};AccountKey={2}', variables('storageAccountName'), environment().suffixes.storage, listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-04-01').keys[0].value)]",
+        "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+        "FUNCTIONS_EXTENSION_VERSION": "~4",
+        "WEBSITE_CONTENTSHARE": "[toLower(variables('alertAppName'))]",
+        "SLACK_URL": "[format('@Microsoft.KeyVault(SecretUri={0})',reference(variables('kvResourceId'), '2019-09-01').secretUriWithVersion)]"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/functions",
+      "apiVersion": "2020-12-01",
+      "name": "[format('{0}/{1}', variables('alertAppName'), variables('alertFunctionName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('alertAppName'))]"
+      ],
+      "properties": {
+        "config": {
+          "disabled": false,
+          "bindings": [
+            {
+              "name": "req",
+              "type": "httpTrigger",
+              "direction": "in",
+              "authLevel": "function",
+              "methods": ["get", "post"]
+            },
+            {
+              "name": "$return",
+              "type": "http",
+              "direction": "out"
+            }
+          ]
+        },
+        "files": {
+          "run.csx": "[parameters('alertScript')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.insights/actionGroups",
+      "apiVersion": "2021-09-01",
+      "name": "[variables('actionGroupsName')]",
+      "location": "Global",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', variables('alertAppName'))]"
+      ],
+      "properties": {
+        "groupShortName": "[variables('actionGroupsName')]",
+        "enabled": true,
+        "azureFunctionReceivers": [
+          {
+            "name": "CpuAlert",
+            "functionAppResourceId": "[resourceId('Microsoft.Web/sites', variables('alertAppName'))]",
+            "httpTriggerUrl": "[uri(format('https://{0}.azurewebsites.net',variables('alertAppName')),format('/api/{0}?code={1}',variables('alertFunctionName'),listKeys(variables('alertAppHostKey'), '2020-12-01').functionKeys.default))]",
+            "functionName": "[variables('alertFunctionName')]",
+            "useCommonAlertSchema": false
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.insights/metricAlerts",
+      "apiVersion": "2018-03-01",
+      "name": "[variables('metricAlertsName')]",
+      "location": "global",
+      "dependsOn": [
+        "[resourceId('Microsoft.insights/actionGroups', variables('actionGroupsName'))]"
+      ],
+      "properties": {
+        "description": "A",
+        "severity": 0,
+        "enabled": true,
+        "scopes": [
+          "[resourceId(parameters('webAppGroup'), 'Microsoft.Web/serverFarms', variables('mainAppPlanName'))]"
+        ],
+        "evaluationFrequency": "PT1M",
+        "windowSize": "PT1M",
+        "criteria": {
+          "allOf": [
+            {
+              "threshold": "[parameters('cpuThreshold')]",
+              "name": "MetricCPU",
+              "metricNamespace": "Microsoft.Web/serverFarms",
+              "metricName": "CpuPercentage",
+              "operator": "GreaterThan",
+              "timeAggregation": "Average",
+              "criterionType": "StaticThresholdCriterion"
+            }
+          ],
+          "odata.type": "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria"
+        },
+        "autoMitigate": true,
+        "actions": [
+          {
+            "actionGroupId": "[resourceId('Microsoft.insights/actionGroups', variables('actionGroupsName'))]"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SetKVAccessPolicy",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "subscriptionId": "[subscription().subscriptionId]",
+      "resourceGroup": "[parameters('commonRG')]",
+      "dependsOn": [
+        "[format('/subscriptions/{0}/resourcegroups/{1}/providers/Microsoft.Web/sites/{2}',subscription().subscriptionId,variables('currentRG'),variables('alertAppName'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "type": "Microsoft.KeyVault/vaults/accessPolicies",
+              "name": "[concat(variables('kvName'), '/add')]",
+              "apiVersion": "2021-11-01-preview",
+              "properties": {
+                "accessPolicies": [
+                  {
+                    "objectId": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('alertAppName')), '2021-02-01', 'Full').identity.principalId]",
+                    "permissions": {
+                      "secrets": ["List", "Get", "Set"]
+                    },
+                    "tenantId": "[reference(resourceId(variables('currentRG'),'Microsoft.Web/sites', variables('alertAppName')), '2021-02-01', 'Full').identity.tenantId]"
+                  }
+                ]
+              }
+            }
+          ],
+          "outputs": {}
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

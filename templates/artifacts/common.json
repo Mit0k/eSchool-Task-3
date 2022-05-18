@@ -1,0 +1,248 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "functions": [
+    {
+      "namespace": "helpers",
+      "members": {
+        "getIPfromSubnet": {
+          "parameters": [
+            {
+              "name": "addressPrefix",
+              "type": "string"
+            },
+            {
+              "name": "ip",
+              "type": "string"
+            }
+          ],
+          "output": {
+            "type": "string",
+            "value": "[format('{0}.{1}.{2}.{3}',split(parameters('addressPrefix'),'.')[0],split(parameters('addressPrefix'),'.')[1],split(parameters('addressPrefix'),'.')[2],parameters('ip'))]"
+          }
+        }
+      }
+    }
+  ],
+  "parameters": {
+    "prefix": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "databaseUsername": {
+      "type": "string"
+    },
+    "databasePassword": {
+      "type": "securestring"
+    },
+    "snetDBAddressPrefix": {
+      "type": "string"
+    },
+    "dbPrivateIp": {
+      "type": "string"
+    },
+    "vnetAddressPrefixes": {
+      "type": "string",
+      "defaultValue": "10.2.0.0/16"
+    },
+    "snetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.2.0.0/24"
+    },
+    "userObjectID": {
+      "type": "string"
+    },
+    "slackURL": {
+      "type": "securestring"
+    },
+    "appID": {
+      "type": "securestring"
+    },
+    "tenantID": {
+      "type": "securestring"
+    }
+  },
+  "variables": {
+    "kvName": "[format('kv-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "vnetName": "[format('vnet-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "snetName": "[concat('snet-',parameters('prefix'))]",
+    "snetDBName": "[concat('snet-db-',parameters('prefix'))]",
+    "vnetLinkSuffix": "[uniqueString(parameters('prefix'))]",
+    "vnetLink": "[concat(variables('privateDnsName'), '/',variables('vnetLinkSuffix'))]",
+    "dbServerName": "[format('db-{0}-{1}',parameters('prefix'),parameters('location'))]",
+    "dbSKU": {
+      "name": "Standard_B1ms"
+    },
+    "dbProperties": {
+      "administratorLogin": "[parameters('databaseUsername')]",
+      "administratorLoginPassword": "[parameters('databasePassword')]",
+      "storage": {
+        "storageSizeGB": 20,
+        "iops": 360,
+        "autoGrow": "Enabled"
+      },
+      "network": {
+        "delegatedSubnetResourceId": "[concat(resourceId('Microsoft.Network/virtualNetworks',variables('vnetName')), '/subnets/',variables('snetDbName'))]",
+        "privateDnsZoneResourceId": "[resourceId('Microsoft.Network/privateDnsZones',variables('privateDnsName'))]"
+      },
+      "version": "5.7",
+      "infrastructureEncryption": "Disabled",
+      "publicNetworkAccess": "Disabled"
+    },
+    "privateDnsName": "[format('{0}.private.mysql.database.azure.com',parameters('prefix'))]",
+    "privateDnsARecordIP": "[helpers.getIPfromSubnet(parameters('snetDBAddressPrefix'),parameters('dbPrivateIp'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2020-11-01",
+      "name": "[variables('vnetName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": ["[parameters('vnetAddressPrefixes')]"]
+        },
+        "subnets": [
+          {
+            "name": "[variables('snetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('snetAddressPrefix')]",
+              "delegations": [
+                {
+                  "name": "delegation",
+                  "properties": {
+                    "serviceName": "Microsoft.Web/serverfarms"
+                  }
+                }
+              ],
+              "privateEndpointNetworkPolicies": "Enabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+          },
+          {
+            "name": "[variables('snetDBName')]",
+            "properties": {
+              "addressPrefix": "[parameters('snetDBAddressPrefix')]",
+              "delegations": [
+                {
+                  "name": "dlg-Microsoft.DBforMySQL-flexibleServers",
+                  "properties": {
+                    "serviceName": "Microsoft.DBforMySQL/flexibleServers"
+                  }
+                }
+              ],
+              "privateEndpointNetworkPolicies": "Enabled",
+              "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+          }
+        ],
+        "enableDdosProtection": false
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones",
+      "apiVersion": "2020-06-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ],
+      "name": "[variables('privateDnsName')]",
+      "location": "global"
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('vnetLink')]",
+      "location": "global",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDnsName'))]"
+      ],
+      "properties": {
+        "registrationEnabled": false,
+        "virtualNetwork": {
+          "id": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/privateDnsZones/A",
+      "apiVersion": "2020-06-01",
+      "name": "[concat(variables('privateDnsName'), '/',variables('dbServerName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones', variables('privateDnsName'))]"
+      ],
+      "properties": {
+        "ttl": 30,
+        "aRecords": [
+          {
+            "ipv4Address": "[variables('privateDnsARecordIP')]"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.DBforMySQL/flexibleServers",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/privateDnsZones/virtualNetworkLinks',variables('privateDnsName'),variables('vnetLinkSuffix'))]"
+      ],
+      "apiVersion": "2021-05-01",
+      "name": "[variables('dbServerName')]",
+      "location": "[parameters('location')]",
+      "sku": "[variables('dbSKU')]",
+      "properties": "[variables('dbProperties')]"
+    },
+    {
+      "name": "[variables('kvName')]",
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2021-10-01",
+      "location": "[parameters('location')]",
+      "properties": {
+        "tenantId": "[subscription().tenantId]",
+        "accessPolicies": [
+          {
+            "objectId": "[parameters('userObjectID')]",
+            "tenantId": "[subscription().tenantId]",
+            "permissions": {
+              "secrets": ["List", "Get", "Set"]
+            }
+          },
+          {
+            "objectId": "[parameters('appID')]",
+            "tenantId": "[parameters('tenantID')]",
+            "permissions": {
+              "secrets": ["List", "Get", "Set"]
+            }
+          }
+        ],
+        "sku": {
+          "name": "standard",
+          "family": "A"
+        }
+      }
+    },
+    {
+      "name": "[format('{0}/{1}Pass',variables('kvName'),variables('dbServerName'))]",
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-10-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('kvName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('databasePassword')]"
+      }
+    },
+    {
+      "name": "[format('{0}/{1}',variables('kvName'),'SlackURL')]",
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-10-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.KeyVault/vaults', variables('kvName'))]"
+      ],
+      "properties": {
+        "value": "[parameters('slackURL')]"
+      }
+    }
+  ],
+  "outputs": {}
+}
