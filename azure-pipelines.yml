@@ -1,13 +1,14 @@
 variables:
   location: "eastus"
   prefix: "crfinal"
+  subscription: "AzureNew"
 
   PROJECT: $(System.TeamProject)
   ORG: $(System.TeamFoundationCollectionUri)
   LINK: $(Build.Repository.Uri)
 
 trigger:
-  - tester
+  - main
 
 pool:
   vmImage: "windows-latest"
@@ -20,7 +21,7 @@ stages:
           - task: AzurePowerShell@5
             name: PS_Deployment
             inputs:
-              azureSubscription: "AzureNew"
+              azureSubscription: "$(subscription)"
               ScriptType: "FilePath"
               ScriptPath: "templates/azuredeploy.ps1"
               ScriptArguments: -Location ${env:location} -prefix ${env:prefix} -slackURL $env:MAPPED_SLACK_URL -userObjectID $env:MAPPED_USER_OBJECT_ID -templateUrlList ${env:templateUrlList}

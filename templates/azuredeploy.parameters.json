@@ -2,23 +2,8 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "prefix": {
-      "value": "armtest"
-    },
-    "location": {
-      "value": "eastus"
-    },
     "databaseUsername": {
       "value": "mysqladmin"
-    },
-    "databasePassword": {
-      "value": ""
-    },
-    "slackURL": {
-      "value": ""
-    },
-    "alertScript": {
-      "value": ""
     },
     "vnetAddressPrefixes": {
       "value": "10.2.0.0/16"
@@ -32,13 +17,6 @@
     "dbPrivateIp": {
       "value": "4"
     },
-    "RgList": {
-      "value": [
-        "resourceGroupName1",
-        "resourceGroupName2",
-        "resourceGroupName2"
-      ]
-    },
     "maxInstances": {
       "value": 2
     },
@@ -48,14 +26,36 @@
     "cpuThreshold": {
       "value": 75
     },
+    "prefix": {
+      "value": "armtest"
+    },
+    "location": {
+      "value": "eastus"
+    },
+    "databasePassword": {
+      "value": ""
+    },
+    "slackURL": {
+      "value": ""
+    },
+    "alertScript": {
+      "value": ""
+    },
+    "RgList": {
+      "value": [
+        "resourceGroupName1",
+        "resourceGroupName2",
+        "resourceGroupName2"
+      ]
+    },
     "userObjectID": {
       "value": ""
     },
     "appID": {
-      "value": "" // TODO: Fill in parameter value
+      "value": ""
     },
     "tenantID": {
-      "value": "" // TODO: Fill in parameter value
+      "value": ""
     }
   }
 }
